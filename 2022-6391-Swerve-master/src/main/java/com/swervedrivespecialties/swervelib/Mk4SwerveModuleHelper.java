@@ -1,3 +1,8 @@
+
+
+
+
+   
 package com.swervedrivespecialties.swervelib;
 
 import com.swervedrivespecialties.swervelib.ctre.*;
@@ -249,7 +254,7 @@ public final class Mk4SwerveModuleHelper {
     /**
      * Creates a Mk4 swerve module that uses NEOs for driving and steering.
      *
-     * @param l2        The gearing configuration the module is in.
+     * @param gearRatio        The gearing configuration the module is in.
      * @param driveMotorPort   The CAN ID of the drive NEO.
      * @param steerMotorPort   The CAN ID of the steer NEO.
      * @param steerEncoderPort The CAN ID of the steer CANCoder.
@@ -257,13 +262,13 @@ public final class Mk4SwerveModuleHelper {
      * @return The configured swerve module.
      */
     public static SwerveModule createNeo(
-            GearRatio l2,
+            GearRatio gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
             double steerOffset
     ) {
-        return createNeo(new Mk4ModuleConfiguration(), l2, driveMotorPort, steerMotorPort, steerEncoderPort, steerOffset);
+        return createNeo(new Mk4ModuleConfiguration(), gearRatio, driveMotorPort, steerMotorPort, steerEncoderPort, steerOffset);
     }
 
     /**

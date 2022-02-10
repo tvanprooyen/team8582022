@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.CANSparkMax;
@@ -21,9 +20,6 @@ import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.*;
 import com.kauailabs.navx.*;
-
-
-
 
 
 public class Robot extends TimedRobot {
@@ -47,10 +43,9 @@ public class Robot extends TimedRobot {
     CameraServer.startAutomaticCapture();
 
     //Joysticks
-   // Driver1 = new Joystick(0);
-  //  Driver2 = new Joystick(1);
+    Driver1 = new Joystick(0);
+    Driver2 = new Joystick(1);
 
-  /*
     //Intake System
     IntakePositioner = new CANSparkMax( 10, MotorType.kBrushless);
     IntakePositionerEncoder = IntakePositioner.getEncoder();
@@ -88,7 +83,6 @@ public class Robot extends TimedRobot {
     kP2 = 0.1; kI2 = 1e-4;kD2 = 1; kIz2 = 0; kFF2 = 0; kMaxOutput2 = 1; kMinOutput2 = -1;
     ArmPID.setP(kP2);ArmPID.setI(kI2);ArmPID.setD(kD2);ArmPID.setIZone(kIz2);ArmPID.setFF(kFF2);
     ArmPID.setOutputRange(kMinOutput2, kMaxOutput2);
-    */
   }
 
   @Override
@@ -126,15 +120,8 @@ public class Robot extends TimedRobot {
 
 
 
-/*
-    double setPoint = 9000000;            
-    ShooterPID.setReference(setPoint, ControlType.kVelocity);
+
    
-    if( Driver2.getRawButton(0)){
-      if( ShooterEncoder.getVelocity() > setPoint){
-        Shooter.set(1);
-      }
-    }
 
     if( Driver2.getRawButton(1)){
         IntakePositioner.set(1);
@@ -144,13 +131,7 @@ public class Robot extends TimedRobot {
         Shooter.set(0.3);
     }
 
-    ArmPID.setReference(rotations, CANSparkMax.ControlType.kPosition);
-    if( Driver2.getRawButton(1)){
-       rotations = 4;
-    } else if(Driver2.getRawButton(2)){
-       rotations = 7;
-    } 
-*/
+  
 
     
   }
@@ -163,7 +144,47 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {}
 }
+}
+
+
+public class b extends RobotBase {
+  private void Shooting() {
+
+
+     double setPoint = 9000000;            
+    ShooterPID.setReference(setPoint, ControlType.kVelocity);
+   
+    if( Driver2.getRawButton(0)){
+      if( ShooterEncoder.getVelocity() > setPoint){
+        Shooter.set(1);
+      }
+    }
+
+
+  }
+  private void PickingUp(){
+    ArmPID.setReference(rotations, CANSparkMax.ControlType.kPosition);
+    if( Driver2.getRawButton(1)){
+       rotations = 4;
+    } else if(Driver2.getRawButton(2)){
+       rotations = 7;
+    } 
+
+  }
+  private void Drivweee(){
+       //its just drive fast boi
+
+  }
+  private void Climbing(){
+      //in your fdreams
+  
+  }
+  static int Limelight(){
+       
 
 
 
+}
 
+}
+  
