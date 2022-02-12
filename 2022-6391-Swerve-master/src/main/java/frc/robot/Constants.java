@@ -1,10 +1,7 @@
-
 package frc.robot;
 
-
 public final class Constants {
-   
-     //Left to right between wheels in meters
+    //Left to right between wheels in meters
     public static final double TrackWidth = 0.572;
     //front to back between wheels in meters
     public static final double WheelBase = 0.572; 
@@ -32,4 +29,14 @@ public final class Constants {
     public static final int BRsteerID = 9;
     public static final int BRencoderID = 28;
     public static final double BRoffset = -Math.toRadians(127.0); 
+
+    //Controls
+    public static final int Abutton = 0;
+
+    //SparkMax ids
+    public static final int ShooterID = 200; //place holders for now
+    public static final int ArmID = 201;
+    public static final int ArmBeltID = 202;
+    public static final int ConveyorID = 203;
+   
 }

@@ -1,27 +1,34 @@
-
+/*
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
-public class IntakeSubsystem extends SubsystemBase {
+import static frc.robot.Constants.*;
 
-    private final CANSparkMax Intake = new CANSparkMax(10,MotorType.kBrushless);
+public class ArmControl extends SubsystemBase {
+    private final CANSparkMax Arm = new CANSparkMax(ArmID,MotorType.kBrushless);
+    private final CANSparkMax Armbelt = new CANSparkMax(ArmBeltID,MotorType.kBrushless);
 
-    public void IntakeSubsytem() {
+    public ArmControl(){}
 
+    public void MoveArm(double ArmSpeed){
+        Arm.set(ArmSpeed);
     }
 
-    public void setIntake(double b){
-        Intake.set(b);
+    public void MoveArmBelt(double BeltSpeed){
+        Armbelt.set(BeltSpeed);
     }
     
-    @Override
-    public void periodic(){ 
+    public SparkMaxPIDController getPID(){
+        return Arm.getPIDController();
     }
 
+    
+
+    @Override
+    public void periodic(){}
 }
+*/
