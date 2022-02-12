@@ -1,4 +1,4 @@
-/*
+
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,9 +12,16 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private final CANSparkMax Intake = new CANSparkMax(10,MotorType.kBrushless);
 
-    public void IntakeSubsytem() {}
+    public void IntakeSubsytem() {
 
-    public void setIntake( s);
+    }
+
+    public void setIntake(double b){
+        Intake.set(b);
+    }
+    
+    @Override
+    public void periodic(){ 
+    }
 
 }
-*/
