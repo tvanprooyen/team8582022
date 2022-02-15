@@ -16,7 +16,7 @@ public final class Constants {
     public static final int FRdriveID = 6;
     public static final int FRsteerID = 7; 
     public static final int FRencoderID = 29;
-    public static final double FRoffset = -Math.toRadians(232.38);
+    public static final double FRoffset = -Math.toRadians( 232.38);
 
     //Back Left
     public static final int BLdriveID = 4;
@@ -34,7 +34,7 @@ public final class Constants {
     public static final int Abutton = 0;
 
     //SparkMax ids
-    public static final int ShooterID = 200; //place holders for now
+    public static final int ShooterID = 7; //place holders for now
     public static final int ArmID = 201;
     public static final int ArmBeltID = 202;
     public static final int ConveyorID = 203;

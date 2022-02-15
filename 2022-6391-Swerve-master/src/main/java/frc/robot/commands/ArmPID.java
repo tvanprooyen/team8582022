@@ -42,7 +42,7 @@ public class ArmPID extends CommandBase {
     @Override
     public void end(boolean interrupted) {
        armcontrol.MoveArm(0);
-       armcontrol.MoveBelt(0);
+       armcontrol.MoveArmBelt(0);
     }
 
     @Override 
