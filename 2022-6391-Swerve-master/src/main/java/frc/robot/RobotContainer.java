@@ -1,6 +1,8 @@
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
+
 
 package frc.robot;
 
@@ -29,6 +31,7 @@ public class RobotContainer {
  // private final Shooting shooter = new Shooting();
  // private final ArmControl armcontrol = new ArmControl();
  // private final Conveyer convey = new Conveyer();
+ //rivate final DefaultDriveCommand Drivetrain = new DefaultDriveCommand();
   
 
   private final Joystick driver1 = new Joystick(0);
@@ -39,22 +42,29 @@ public class RobotContainer {
     //1: up and down 
     //0: left and right
     // 4: rotation
+
     
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
             () -> -modifyAxis( driver1.getRawAxis(1)) * DrivetrainSubsystem.MaxVelocity, 
             () -> -modifyAxis( driver1.getRawAxis(0)) * DrivetrainSubsystem.MaxVelocity,
-            () -> -modifyAxis( driver1.getRawAxis(4)) * DrivetrainSubsystem.MaxAngularVelocity 
+            () -> -modifyAxis( driver1.getRawAxis(4)) * DrivetrainSubsystem.MaxAngularVelocity, false
+            
     ));
    
+
     // Configure the button bindings
     configureButtonBindings();
   }
 
+
   private void configureButtonBindings() {
    
    new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
-/*
+
+  new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(2), () -> driver1.getRawAxis(3), () -> driver1.getRawAxis(4), false));
+
+   /*
     //shooter
     //I dont know why but 5500 dosent get it up to full speed 
     new JoystickButton(driver2, 3).whileActiveOnce(new ShootingPIDCmd(shooter, 20000, true) );

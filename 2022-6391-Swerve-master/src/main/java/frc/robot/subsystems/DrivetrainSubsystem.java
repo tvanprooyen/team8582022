@@ -74,13 +74,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_navx.zeroYaw();
     }
 
-    public double getLimelight(){
+    public double getLimelightTX(){
         double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
         double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
         double ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
         double ta = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
 
-        return tv;
+        return tx;
     }
 
     //gyro rotation
@@ -95,6 +95,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public void drive(ChassisSpeeds chassisSpeeds) {
         m_chassisSpeeds = chassisSpeeds;
     }
+
+    
+
 
     @Override
     public void periodic() {

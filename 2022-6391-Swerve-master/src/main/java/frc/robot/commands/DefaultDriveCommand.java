@@ -15,6 +15,7 @@ public class DefaultDriveCommand extends CommandBase {
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
     private final boolean mode;
+    
 
     public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
                                DoubleSupplier translationXSupplier,
@@ -31,8 +32,9 @@ public class DefaultDriveCommand extends CommandBase {
     @Override
     public void execute() {
        
-        if(mode){
+        
         //normal drive 
+        if(mode){
         m_drivetrainSubsystem.drive(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                         m_translationXSupplier.getAsDouble(),
@@ -43,17 +45,17 @@ public class DefaultDriveCommand extends CommandBase {
         );
         } else {
         //steer with limelight
-
+         
          double getSteerConstant = 0;
-         float Kp = -0.1f;
-         float min_command = 0.05f;
+         double Kp = -0.1f;
+         double min_command = 0.05f;
          
          
          double tx = m_drivetrainSubsystem.getLimelightTX();
          
         
-                 float heading_error = -tx;
-                 float steering_adjust = 0.0f;
+                 double heading_error = -tx;
+                 double steering_adjust = 0.0f;
                  if (tx > 1.0){
                          steering_adjust = Kp*heading_error - min_command;
                  }else if (tx < 1.0){
@@ -69,12 +71,14 @@ public class DefaultDriveCommand extends CommandBase {
                         0.0,
                        0.0,
                         steering_adjust,
-                        m_drivetrainSubsystem.getGyroscopeRotation()
+                        m_drivetrainSubsystem.getGyroscopeRotation())
                 );
+                SmartDashboard.putNumber("tv",m_drivetrainSubsystem.getLimelightTX());
+                }    
         }
 
-        SmartDashboard.putNumber("tv",m_drivetrainSubsystem.getLimelight());
-    }
+        
+    
 
     @Override
     public void end(boolean interrupted) {
