@@ -3,10 +3,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Conveyer;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class ConveyerCmd extends CommandBase {
     private final Conveyer convey;
     private final double speed;
+    
 
     public ConveyerCmd(Conveyer convey, double speed) {
         this.convey = convey;
@@ -16,7 +18,7 @@ public class ConveyerCmd extends CommandBase {
 
     @Override
     public void initialize() {
-      
+    
     }
 
     @Override

@@ -2,9 +2,9 @@ package frc.robot;
 
 public final class Constants {
     //Left to right between wheels in meters
-    public static final double TrackWidth = 0.572;
+    public static final double TrackWidth = 0.5762625;
     //front to back between wheels in meters
-    public static final double WheelBase = 0.572; 
+    public static final double WheelBase = 0.5762625;
 
     //Front Left 
     public static final int FLdriveID = 2; 

@@ -1,4 +1,4 @@
-/*
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 import static frc.robot.Constants.*;
 
@@ -72,6 +74,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_navx.zeroYaw();
     }
 
+    public double getLimelight(){
+        double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
+        double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+        double ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+        double ta = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
+
+        return tv;
+    }
+
     //gyro rotation
     public Rotation2d getGyroscopeRotation() {
         if (m_navx.isMagnetometerCalibrated()) {
@@ -96,4 +107,3 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());
     }
 }
-*/

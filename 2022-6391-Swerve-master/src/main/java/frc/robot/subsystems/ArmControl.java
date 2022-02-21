@@ -18,16 +18,13 @@ public class ArmControl extends SubsystemBase {
         Arm.set(ArmSpeed);
     }
 
-    public void MoveArmBelt(double BeltSpeed){
-        Armbelt.set(BeltSpeed);
+    public void MoveArmBelt(){
+        Armbelt.set(0.7);
     }
     
-    public SparkMaxPIDController getPID(){
-        return Arm.getPIDController();
+    public CANSparkMax getMotor(){
+        return Arm;
     }
-
-    
-
     @Override
     public void periodic(){}
 }
