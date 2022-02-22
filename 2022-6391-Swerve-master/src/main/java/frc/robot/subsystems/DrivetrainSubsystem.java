@@ -17,7 +17,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -57,6 +59,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModule m_frontRightModule;
     private final SwerveModule m_backLeftModule;
     private final SwerveModule m_backRightModule;
+    private final Joystick driver1 = new Joystick(0);
 
     private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -101,12 +104,45 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MaxVelocity);
 
-        m_frontLeftModule.set(states[0].speedMetersPerSecond / MaxVelocity * Voltage, states[0].angle.getRadians());
-        m_frontRightModule.set(states[1].speedMetersPerSecond / MaxVelocity * Voltage, states[1].angle.getRadians());
-        m_backLeftModule.set(states[2].speedMetersPerSecond / MaxVelocity * Voltage, states[2].angle.getRadians());
-        m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());
+        double getSteerConstant = 0;
+        double Kp = -0.5f;
+        double min_command = 0.05f;
+         
+         
+         double tx = getLimelightTX();
+         
+        
+        double heading_error = -tx;
+        double steering_adjust = 0.0f;
+        if (tx > 1.0){
+                steering_adjust = Kp*heading_error - min_command;
+        }else if (tx < 1.0){
+                steering_adjust = Kp*heading_error + min_command;
+        }
+
+        SmartDashboard.putNumber("tv", getLimelightTX());
+
+        double Rotation0 = states[0].speedMetersPerSecond / MaxVelocity * Voltage;
+        double Rotation1 = states[1].speedMetersPerSecond / MaxVelocity * Voltage;
+        double Rotation2 = states[2].speedMetersPerSecond / MaxVelocity * Voltage;
+        double Rotation3 = states[3].speedMetersPerSecond / MaxVelocity * Voltage;
+
+        
+
+        if(driver1.getRawButton(3)){
+            Rotation0 += steering_adjust;
+            Rotation1 -= steering_adjust;
+            Rotation2 += steering_adjust;
+            Rotation3 -= steering_adjust;
+        }
+
+        m_frontLeftModule.set(Rotation0, states[0].angle.getRadians());
+        m_frontRightModule.set(Rotation1, states[1].angle.getRadians());
+        m_backLeftModule.set(Rotation2, states[2].angle.getRadians());
+        m_backRightModule.set(Rotation3, states[3].angle.getRadians());
     }
 }

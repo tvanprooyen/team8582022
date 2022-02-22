@@ -7,6 +7,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -42,14 +43,12 @@ public class RobotContainer {
     //1: up and down 
     //0: left and right
     // 4: rotation
-
     
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
             () -> -modifyAxis( driver1.getRawAxis(1)) * DrivetrainSubsystem.MaxVelocity, 
             () -> -modifyAxis( driver1.getRawAxis(0)) * DrivetrainSubsystem.MaxVelocity,
-            () -> -modifyAxis( driver1.getRawAxis(4)) * DrivetrainSubsystem.MaxAngularVelocity, false
-            
+            () -> -modifyAxis( driver1.getRawAxis(4)) * DrivetrainSubsystem.MaxAngularVelocity
     ));
    
 
@@ -62,7 +61,7 @@ public class RobotContainer {
    
    new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
 
-  new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(2), () -> driver1.getRawAxis(3), () -> driver1.getRawAxis(4), false));
+  new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(2), () -> driver1.getRawAxis(3), () -> driver1.getRawAxis(4)));
 
    /*
     //shooter
