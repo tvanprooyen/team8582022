@@ -48,7 +48,7 @@ public class RobotContainer {
             m_drivetrainSubsystem,
             () -> -modifyAxis( driver1.getRawAxis(1)) * DrivetrainSubsystem.MaxVelocity, 
             () -> -modifyAxis( driver1.getRawAxis(0)) * DrivetrainSubsystem.MaxVelocity,
-            () -> -modifyAxis( driver1.getRawAxis(4)) * DrivetrainSubsystem.MaxAngularVelocity
+            () -> -modifyAxis( m_drivetrainSubsystem.injectedRotation(4,3)) * DrivetrainSubsystem.MaxAngularVelocity
     ));
    
 
@@ -58,10 +58,11 @@ public class RobotContainer {
 
 
   private void configureButtonBindings() {
+    //3: Track Target
    
    new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
 
-  new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(2), () -> driver1.getRawAxis(3), () -> driver1.getRawAxis(4)));
+  new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(2), () -> driver1.getRawAxis(3), () -> m_drivetrainSubsystem.injectedRotation(4,3)));
 
    /*
     //shooter

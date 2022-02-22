@@ -26,6 +26,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 import static frc.robot.Constants.*;
 
+import java.util.function.DoubleSupplier;
+
 public class DrivetrainSubsystem extends SubsystemBase {
   
     //Voltage of the battery
@@ -100,11 +102,53 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     
+    public double injectedRotation(int m_axis, int m_trackButton) {
+        //Constants
+        double getSteerConstant = 0;
+        double Kp = -0.5f;
+        double min_command = 0.05f;
+         
+        //Target
+        double tx = getLimelightTX();
+         
+        
+        //PID
+        double heading_error = -tx;
+        double steering_adjust = 0.0f;
+        if (tx > 1.0){
+                steering_adjust = Kp*heading_error - min_command;
+        }else if (tx < 1.0){
+                steering_adjust = Kp*heading_error + min_command;
+        }
+
+        //Post to Dashboard
+        SmartDashboard.putNumber("tv", getLimelightTX());
+
+        //Default to JoyStick
+        double Rotation = driver1.getRawAxis(m_axis);
+
+        //Activly adjust twords target
+        if(driver1.getRawButton(m_trackButton)){
+            Rotation += steering_adjust;
+        }
+
+        return Rotation;
+    }
+    
 
 
     @Override
     public void periodic() {
+        SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, MaxVelocity);
 
+        m_frontLeftModule.set(states[0].speedMetersPerSecond / MaxVelocity * Voltage, states[0].angle.getRadians());
+        m_frontRightModule.set(states[1].speedMetersPerSecond / MaxVelocity * Voltage, states[1].angle.getRadians());
+        m_backLeftModule.set(states[2].speedMetersPerSecond / MaxVelocity * Voltage, states[2].angle.getRadians());
+        m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());
+
+        /* 
+        //Depreciated Code(Incase of new doesn't work)
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MaxVelocity);
 
@@ -143,6 +187,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_frontLeftModule.set(Rotation0, states[0].angle.getRadians());
         m_frontRightModule.set(Rotation1, states[1].angle.getRadians());
         m_backLeftModule.set(Rotation2, states[2].angle.getRadians());
-        m_backRightModule.set(Rotation3, states[3].angle.getRadians());
+        m_backRightModule.set(Rotation3, states[3].angle.getRadians()); */
     }
 }
