@@ -1,4 +1,3 @@
-/*
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -8,8 +7,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.*;
 
 public class Conveyer extends SubsystemBase {  
-    private DigitalInput sensor0,sensor1,sensor2,sensor3,sensor4;
+    /* private DigitalInput sensor0,sensor1,sensor2,sensor3,sensor4;
     private final CANSparkMax conveyer = new CANSparkMax(ConveyorID,MotorType.kBrushless);
+
+    private boolean latch;
 
     public Conveyer(){}
 
@@ -33,11 +34,42 @@ public class Conveyer extends SubsystemBase {
         return sensor4.get();
     }
 
-    @Override
-    public void periodic(){}
-
-        public void setSpeed(double speed){
-         conveyer.set(speed);
+    public boolean latch(boolean latch) {
+        this.latch = false;
+        return latch;
     }
+
+    public boolean getLatch() {
+        return this.latch;
+    }
+
+    public void gate() {
+        if( 
+            (!getSensor0() && !getSensor1()) ||
+            (getLatch() && getSensor1())
+
+        ) latch(false);  return;
+        
+        if(
+            getSensor0() ||
+            (getSensor0() && getSensor1())
+        ) latch(true); return;
+    }
+
+    @Override
+    public void periodic(){
+        gate();
+
+        if(getLatch()) {
+            setSpeed(0.1);
+        } else {
+            setSpeed(0);
+        }
+    }
+    
+
+    public void setSpeed(double speed){
+         conveyer.set(speed);
+    } */
 }
-*/
+

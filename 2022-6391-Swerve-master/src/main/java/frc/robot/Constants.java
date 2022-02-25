@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.team858.control.Joystick_858;
+
 public final class Constants {
     //Left to right between wheels in meters
     public static final double TrackWidth = 0.5762625;
@@ -38,5 +40,13 @@ public final class Constants {
     public static final int ArmID = 201;
     public static final int ArmBeltID = 202;
     public static final int ConveyorID = 203;
+
+    //Slew Rate Limiter
+    public static final double changeRate = 0.5;
    
+    //Dead Band
+    public static final double deadband = 0.2;
+
+    //Modify
+    public static final boolean modify = true;
 }

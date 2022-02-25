@@ -6,7 +6,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -35,8 +34,8 @@ public class RobotContainer {
  //rivate final DefaultDriveCommand Drivetrain = new DefaultDriveCommand();
   
 
-  private final Joystick driver1 = new Joystick(0);
- //private final Joystick driver2 = new Joystick(1);
+  //private final Joystick_858 driver1 = new Joystick_858(0);
+  //private final Joystick driver2 = new Joystick(1);
 
   public RobotContainer() {
     //configures joytsick to drivetrainsubsystem
@@ -46,9 +45,9 @@ public class RobotContainer {
     
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
-            () -> -modifyAxis( driver1.getRawAxis(1)) * DrivetrainSubsystem.MaxVelocity, 
-            () -> -modifyAxis( driver1.getRawAxis(0)) * DrivetrainSubsystem.MaxVelocity,
-            () -> -modifyAxis( m_drivetrainSubsystem.injectedRotation(4,3)) * DrivetrainSubsystem.MaxAngularVelocity
+            () -> -Controls.driver1.limiter(1) * DrivetrainSubsystem.MaxVelocity, 
+            () -> -Controls.driver1.limiter(0) * DrivetrainSubsystem.MaxVelocity,
+            () -> -m_drivetrainSubsystem.injectedRotation(4,3) * DrivetrainSubsystem.MaxAngularVelocity
     ));
    
 
@@ -60,9 +59,9 @@ public class RobotContainer {
   private void configureButtonBindings() {
     //3: Track Target
    
-   new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
+   new JoystickButton(Controls.driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
 
-  new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(2), () -> driver1.getRawAxis(3), () -> m_drivetrainSubsystem.injectedRotation(4,3)));
+  new JoystickButton(Controls.driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  Controls.driver1.getRawAxis(2), () -> Controls.driver1.getRawAxis(3), () -> m_drivetrainSubsystem.injectedRotation(4,3)));
 
    /*
     //shooter
@@ -83,29 +82,5 @@ public class RobotContainer {
  
   public Command getAutonomousCommand() {
     return new InstantCommand();
-  }
-
-
-  //dead band functions
-  private static double deadband(double value, double deadband) {
-    if (Math.abs(value) > deadband) {
-      if (value > 0.0) {
-        return (value - deadband) / (1.0 - deadband);
-      } else {
-        return (value + deadband) / (1.0 - deadband);
-      }
-    } else {
-      return 0.0;
-    }
-  }
-
-  private static double modifyAxis(double value) {
-    // Deadband
-    value = deadband(value, 0.2);
-
-    // Square the axis
-    value = Math.copySign(value * value, value);
-
-    return value;
   }
 }

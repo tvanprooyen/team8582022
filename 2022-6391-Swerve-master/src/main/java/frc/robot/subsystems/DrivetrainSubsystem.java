@@ -9,6 +9,8 @@ import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
+import com.team858.control.Joystick_858;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -19,6 +21,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Controls;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.networktables.NetworkTable;
@@ -61,7 +65,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModule m_frontRightModule;
     private final SwerveModule m_backLeftModule;
     private final SwerveModule m_backRightModule;
-    private final Joystick driver1 = new Joystick(0);
+
+
+    //private final Joystick_858 driver1 = new Joystick_858(0);
 
     private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -111,7 +117,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
         //Target
         double tx = getLimelightTX();
          
-        
         //PID
         double heading_error = -tx;
         double steering_adjust = 0.0f;
@@ -125,16 +130,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("tv", getLimelightTX());
 
         //Default to JoyStick
-        double Rotation = driver1.getRawAxis(m_axis);
+        double Rotation = Controls.driver1.limiter(m_axis);
 
         //Activly adjust twords target
-        if(driver1.getRawButton(m_trackButton)){
+        if(Controls.driver1.getRawButton(m_trackButton)){
             Rotation += steering_adjust;
         }
 
         return Rotation;
     }
-    
 
 
     @Override
