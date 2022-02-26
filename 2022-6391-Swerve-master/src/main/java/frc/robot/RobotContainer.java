@@ -6,6 +6,10 @@
 
 package frc.robot;
 
+import com.team858.control.ControlMathUtil;
+import com.team858.control.Joystick_858;
+
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,9 +20,9 @@ import frc.robot.commands.DefaultDriveCommand;
 //import frc.robot.commands.ShootingPIDCmd;
 //import frc.robot.commands.ConveyerCmd;
 //import frc.robot.commands.ArmPID;
-
+import frc.robot.subsystems.ArmControl;
 //import frc.robot.subsystems.ArmControl;
-//import frc.robot.subsystems.Conveyer;
+import frc.robot.subsystems.Conveyer;
 import frc.robot.subsystems.DrivetrainSubsystem;
 //import frc.robot.subsystems.Shooting;
 
@@ -28,13 +32,14 @@ public class RobotContainer {
   //private final ArmControl armsubsystem = new ArmControl();
   
   
- // private final Shooting shooter = new Shooting();
+  //private final Shooting shooter = new Shooting();
  // private final ArmControl armcontrol = new ArmControl();
- // private final Conveyer convey = new Conveyer();
+  private final Conveyer convey = new Conveyer();
+  private final ArmControl armControl = new ArmControl();
  //rivate final DefaultDriveCommand Drivetrain = new DefaultDriveCommand();
   
 
-  //private final Joystick_858 driver1 = new Joystick_858(0);
+  private final Joystick driver1 = new Joystick(0);
   //private final Joystick driver2 = new Joystick(1);
 
   public RobotContainer() {
@@ -45,9 +50,9 @@ public class RobotContainer {
     
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
-            () -> -Controls.driver1.limiter(1) * DrivetrainSubsystem.MaxVelocity, 
-            () -> -Controls.driver1.limiter(0) * DrivetrainSubsystem.MaxVelocity,
-            () -> -m_drivetrainSubsystem.injectedRotation(4,3) * DrivetrainSubsystem.MaxAngularVelocity
+            () -> -ControlMathUtil.modifyAxis(driver1.getRawAxis(1), Constants.deadband) * DrivetrainSubsystem.MaxVelocity, 
+            () -> -ControlMathUtil.modifyAxis(driver1.getRawAxis(0), Constants.deadband) * DrivetrainSubsystem.MaxVelocity,
+            () -> -ControlMathUtil.modifyAxis(m_drivetrainSubsystem.injectedRotation(4,3),Constants.deadband) * DrivetrainSubsystem.MaxAngularVelocity
     ));
    
 
@@ -59,24 +64,51 @@ public class RobotContainer {
   private void configureButtonBindings() {
     //3: Track Target
    
-   new JoystickButton(Controls.driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
+    //reset gyro
+   new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
 
-  new JoystickButton(Controls.driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  Controls.driver1.getRawAxis(2), () -> Controls.driver1.getRawAxis(3), () -> m_drivetrainSubsystem.injectedRotation(4,3)));
+  //new JoystickButton(driver1,2).whileHeld(new DefaultDriveCommand(m_drivetrainSubsystem, () ->  driver1.getRawAxis(1), () -> driver1.getRawAxis(0), () -> m_drivetrainSubsystem.injectedRotation(4,3)));
+
+ //shooter
+  //new JoystickButton(driver1, 1).whileActiveOnce(new ShootingPIDCmd(shooter, 20000, true) );
+
+  //conveyor
+  //new JoystickButton(driver1, 2).whileActiveOnce(new ConveyerCmd(convey, -0.2));
+
 
    /*
-    //shooter
-    //I dont know why but 5500 dosent get it up to full speed 
-    new JoystickButton(driver2, 3).whileActiveOnce(new ShootingPIDCmd(shooter, 20000, true) );
-    new JoystickButton(driver2, 4).whileActiveOnce(new ShootingPIDCmd(shooter, 1, false) );
+
+    
+   
 
     //intake
     new JoystickButton(driver2,200).whileActiveOnce(new ArmPID(armcontrol, 2));
 
-    //conveyer
-    //i'm trying my best and have not tested this
-    new JoystickButton(driver2, 6).whileActiveOnce(new ConveyerCmd(convey, 0.5));
+ 
 */
  
+  }
+
+  public static double deadband(double value, double deadband) {
+    if (Math.abs(value) > deadband) {
+      if (value > 0.0) {
+        return (value - deadband) / (1.0 - deadband);
+      } else {
+        return (value + deadband) / (1.0 - deadband);
+      }
+    } else {
+      return 0.0;
+    }
+  }
+
+  public static double modifyAxis(double value, double deadband) {
+    // Deadband
+    value = deadband(value, deadband);
+
+    // Square the axis
+    value = Math.copySign(value * value, value);
+
+    return value;
   }
 
  

@@ -1,4 +1,4 @@
-/*
+/* 
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,7 +19,7 @@ public class Shooting extends SubsystemBase {
     }
 
     public void setShooter(double speed){
-        Shooter.set(speed);
+        //Shooter.set(speed);
     }
 
     public double getEncoder(){
@@ -33,4 +33,4 @@ public class Shooting extends SubsystemBase {
 }
 
 
-*/
+ */

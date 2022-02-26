@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Controls;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.networktables.NetworkTable;
@@ -34,6 +33,8 @@ import java.util.function.DoubleSupplier;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   
+    
+
     //Voltage of the battery
     public static final double Voltage = 12.0;
   
@@ -67,11 +68,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModule m_backRightModule;
 
 
-    //private final Joystick_858 driver1 = new Joystick_858(0);
+    private final Joystick driver1 = new Joystick(0);
 
     private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
     public DrivetrainSubsystem() {
+
+        SmartDashboard.putNumber("Kp", -0.05f);
+        SmartDashboard.putNumber("min", 0.05f);
+     
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
         m_frontLeftModule = Mk4SwerveModuleHelper.createNeo(tab.getLayout("fl", BuiltInLayouts.kList), Mk4SwerveModuleHelper.GearRatio.L2, FLdriveID, FLsteerID, FLencoderID, FLoffset);
@@ -111,8 +116,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public double injectedRotation(int m_axis, int m_trackButton) {
         //Constants
         double getSteerConstant = 0;
-        double Kp = -0.5f;
-        double min_command = 0.05f;
+        double Kp = SmartDashboard.getNumber("Kp",-0.05f);
+        double min_command = SmartDashboard.getNumber("min",0.05f);
          
         //Target
         double tx = getLimelightTX();
@@ -130,11 +135,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("tv", getLimelightTX());
 
         //Default to JoyStick
-        double Rotation = Controls.driver1.limiter(m_axis);
+        double Rotation;
 
         //Activly adjust twords target
-        if(Controls.driver1.getRawButton(m_trackButton)){
-            Rotation += steering_adjust;
+        if(driver1.getRawButton(m_trackButton)){
+            Rotation = steering_adjust;
+        } else {
+            Rotation = driver1.getRawAxis(m_axis);
         }
 
         return Rotation;

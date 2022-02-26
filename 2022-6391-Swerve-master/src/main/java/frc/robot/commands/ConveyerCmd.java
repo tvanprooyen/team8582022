@@ -1,4 +1,4 @@
-/*
+/* 
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -23,7 +23,13 @@ public class ConveyerCmd extends CommandBase {
 
     @Override
     public void execute() {
-        convey.setSpeed(speed);
+        double c_speed = 0;
+
+       if(!convey.getSensor3()){
+        c_speed = -0.2;
+       }
+
+       convey.setSpeed(c_speed);
     }
 
     @Override
@@ -37,4 +43,4 @@ public class ConveyerCmd extends CommandBase {
     }
 }
 
-*/
+ */
