@@ -68,7 +68,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModule m_backRightModule;
 
 
-    private final Joystick driver1 = new Joystick(0);
+    private final Joystick driver1 = new Joystick(Driver1Port);
 
     private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 

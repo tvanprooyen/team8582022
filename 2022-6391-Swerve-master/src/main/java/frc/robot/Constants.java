@@ -3,6 +3,10 @@ package frc.robot;
 import com.team858.control.Joystick_858;
 
 public final class Constants {
+    //Joystick Ports
+    public static final int Driver1Port = 0; 
+    public static final int Driver2Port = 1; 
+
     //Left to right between wheels in meters
     public static final double TrackWidth = 0.5762625;
     //front to back between wheels in meters
@@ -35,12 +39,6 @@ public final class Constants {
     //Controls
     public static final int Abutton = 0;
 
-    //SparkMax ids
-    public static final int ShooterID = 2; //place holders for now
-    public static final int ArmID = 3;
-    public static final int ArmBeltID = 13;
-    public static final int ConveyorID = 12;
-
     //Slew Rate Limiter
     public static final double changeRate = 0.5;
    
@@ -49,4 +47,34 @@ public final class Constants {
 
     //Modify
     public static final boolean modify = true;
+
+    //Shooter
+    //Motor
+    public static final int ShooterID = 2;
+
+    //Conveyor
+    //Motor
+    public static final int ConveyorID = 12;
+    //Digital Pin ID
+    public static final int ConveyorProximitySensor0 = 0;
+    public static final int ConveyorProximitySensor1 = 1;
+    public static final int ConveyorProximitySensor2 = 2;
+    public static final int ConveyorProximitySensor3 = 3;
+    //Speeds
+    public static final double ConveyorLowSpeed = -0.25;
+    public static final double ConveyorHighSpeed = -0.7;
+    public static final double ConveyorReverseSpeed = 0.2;
+
+    //Arm
+    //Motor
+    public static final int ArmID = 3;
+    public static final int ArmBeltID = 13;
+    //Digital Pin ID
+    public static final int ArmEncoderA = 5;
+    public static final int ArmEncoderB = 6;
+    public static final int ArmEncoderI = 7;
+    public static final int ArmMagneticLimitSwitchTop = 8;
+    public static final int ArmMagneticLimitSwitchBottom = 9; //If Needed
+    //Speeds
+    public static final double ArmIntakeSpeed = 0.3;
 }

@@ -39,7 +39,7 @@ public class RobotContainer {
  //rivate final DefaultDriveCommand Drivetrain = new DefaultDriveCommand();
   
 
-  private final Joystick driver1 = new Joystick(0);
+  private final Joystick driver1 = new Joystick(Constants.Driver1Port);
   //private final Joystick driver2 = new Joystick(1);
 
   public RobotContainer() {
