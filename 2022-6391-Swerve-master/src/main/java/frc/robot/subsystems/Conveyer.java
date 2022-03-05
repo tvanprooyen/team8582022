@@ -1,49 +1,85 @@
+
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.*;
 
-public class Conveyer extends SubsystemBase {  
-    private DigitalInput sensor3 = new DigitalInput(3);
-    private DigitalInput sensor0 = new DigitalInput(0);
-    private DigitalInput sensor1 = new DigitalInput(1);
-    private DigitalInput sensor2 = new DigitalInput(2);
+public class Conveyer extends SubsystemBase {
+    //Proximity Sensors
+    private DigitalInput sensor0 = new DigitalInput(ConveyorProximitySensor0);
+    private DigitalInput sensor1 = new DigitalInput(ConveyorProximitySensor1);
+    private DigitalInput sensor2 = new DigitalInput(ConveyorProximitySensor2);
+    private DigitalInput sensor3 = new DigitalInput(ConveyorProximitySensor3);
+
+    //Motors
     private final CANSparkMax conveyer = new CANSparkMax(ConveyorID,MotorType.kBrushless);
-    private final CANSparkMax Shooter = new CANSparkMax(ShooterID,MotorType.kBrushless);
-    private final Joystick driver2 = new Joystick(1);
+    private final CANSparkMax shooter = new CANSparkMax(ShooterID,MotorType.kBrushless);
+
+    //Timers
+    private final Joystick driver2 = new Joystick(Driver2Port);
     private final Timer timer = new Timer();
-    private final Timer shootTimer = new Timer();
+    private final Timer as1 = new Timer();
+
+    //Speed Enum
+    public enum Speed {
+        REV(-1), STOP(0), LOW(1), HIGH(2);
+    
+        private final int value;
+        private Speed(int value) {
+            this.value = value;
+        }
+    
+        public int getValue() {
+            return value;
+        }
+    }
+
+    //Sensor Enum
+    public enum ProxSensor {
+        INIT(0), STATION1(1), STATION2(2), STATION3(3);
+    
+        private final int value;
+        private ProxSensor(int value) {
+            this.value = value;
+        }
+    
+        public int getValue() {
+            return value;
+        }
+    }
 
     private boolean c_startup = true;
 
+    //Shooter PID System
     private SparkMaxPIDController m_pidController;
     private RelativeEncoder m_encoder;
     public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
-    
-    private boolean latch;
 
     public Conveyer(){
         SmartDashboard.putNumber("shooter",7);
 
-        Shooter.restoreFactoryDefaults();
+        shooter.restoreFactoryDefaults();
 
         /**
          * In order to use PID functionality for a controller, a SparkMaxPIDController object
          * is constructed by calling the getPIDController() method on an existing
          * CANSparkMax object
          */
-        m_pidController = Shooter.getPIDController();
+        m_pidController = shooter.getPIDController();
 
         // Encoder object created to display position values
-        m_encoder = Shooter.getEncoder();
+        m_encoder = shooter.getEncoder();
 
         // PID coefficients
         kP = 2e-5;
@@ -54,79 +90,180 @@ public class Conveyer extends SubsystemBase {
         kMaxOutput = 1; 
         kMinOutput = -1;
         maxRPM = 5700;
+
+        //Set PID coefficients
+        m_pidController.setP(kP);
+        m_pidController.setI(kI);
+        m_pidController.setD(kD);
+        m_pidController.setIZone(kIz);
+        m_pidController.setFF(kFF);
+        m_pidController.setOutputRange(kMinOutput, kMaxOutput);
     }
 
-    /* public boolean getSensor0(){
+    public boolean getProxSensor0() {
         return sensor0.get();
     }
 
-    public boolean getSensor1(){
+    public boolean getProxSensor1() {
         return sensor1.get();
     }
 
-    public boolean getSensor2(){
+    public boolean getProxSensor2() {
         return sensor2.get();
-    } */
+    }
 
-    public boolean getSensor3(){
+    public boolean getProxSensor3() {
         return sensor3.get();
     }
 
-    /* public boolean getSensor4(){
-        return sensor4.get();
-    }
- */
-    public boolean latch(boolean latch) {
-        this.latch = false;
-        return latch;
-    }
+    public boolean getProxSensor(int sensor) {
+        boolean value;
 
-    public boolean getLatch() {
-        return this.latch;
-    }
-/*
-    public void gate() {
-        if( 
-            (!getSensor0() && !getSensor1()) ||
-            (getLatch() && getSensor1())
+        switch (sensor) {
+            case 1:
+                value = getProxSensor1();
+                break;
 
-        ) latch(false);  return;
+            case 2:
+                value = getProxSensor2();
+                break;
+
+            case 3:
+                value = getProxSensor3();
+                break;
         
-        if(
-            getSensor0() ||
-            (getSensor0() && getSensor1())
-        ) latch(true); return;
+            default:
+                value = getProxSensor0();
+                break;
+        }
+
+        return value;
     }
-*/
+
+    public boolean getProxSensor(ProxSensor sensor) {
+        boolean value;
+
+        switch (sensor) {
+            case STATION1:
+                value = getProxSensor(1);
+                break;
+
+            case STATION2:
+                value = getProxSensor(2);
+                break;
+
+            case STATION3:
+                value = getProxSensor(3);
+                break;
+        
+            default:
+                value = getProxSensor(0);
+                break;
+        }
+
+        return value;
+    }
+
+    public void setShooterSpeed(double speed) {
+        
+        //Scaled as -1(-100%) thru 1(100%) (aka -5700RPM thru 5700RPM). Example) 0.25(25%) = 1425PRM
+        double setPoint = speed*maxRPM;
+        m_pidController.setReference(setPoint, CANSparkMax.ControlType.kVelocity);
+    }
+
+    public void setConveyerSpeed(double speed){
+        conveyer.set(speed);
+    }
+
+    public void setConveyerSpeed(Speed speedSelect) {
+        switch (speedSelect) {
+            case REV:
+                setConveyerSpeed(Constants.ConveyorReverseSpeed);
+                break;
+            case LOW:
+                setConveyerSpeed(Constants.ConveyorLowSpeed);
+                break;
+            case HIGH:
+                setConveyerSpeed(Constants.ConveyorHighSpeed);
+                break;
+            default:
+                setConveyerSpeed(0);
+                break;
+        }
+    }
+
+    public double GetDistance(){
+        double distance;
+
+        double a2 = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+        distance = (101-44)/(Math.tan((Math.PI/180)*(20+a2)));
+
+       return distance;
+    }
+
+    public void dashboard() {
+        //Send Vaules to Dashboard
+        //Sensors
+        //Prox Sensors
+        //SmartDashboard.putBoolean("Prox Sensor | Initialize", getProxSensor(ProxSensor.INIT));
+        //SmartDashboard.putBoolean("Prox Sensor | Station 1", getProxSensor(ProxSensor.STATION1));
+        //SmartDashboard.putBoolean("Prox Sensor | Station 2", getProxSensor(ProxSensor.STATION2));
+        //SmartDashboard.putBoolean("Prox Sensor | Station 3", getProxSensor(ProxSensor.STATION3));
+        //Encoder
+        SmartDashboard.putNumber("Distance", GetDistance());
+        SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
+
+        //Timers
+        //SmartDashboard.putNumber("Timer", timer.get());
+        //For Automated Sequence # 1
+        //SmartDashboard.putNumber("Shooter Timer", as1.get());
+    }
+
     @Override
     public void periodic(){
-        double c_speed = 0;
+        //Default Motors to Zero
+        Speed c_speed = Speed.STOP;
         double s_speed = 0;
-        boolean beforemotor = sensor3.get();
-
-        SmartDashboard.putBoolean("Sensor3", beforemotor);
-        SmartDashboard.putNumber("Timer", timer.get());
 
         if(driver2.getRawButton(1)){
+            /*  Automated Sequence # 1
+            *   1) Start Shooter, Stop Conveyor, Start Timer
+            *   2) After 2.50 Start Conveyor
+            *   3) After 2.65 Stop Conveyor
+            *   4) After 4.00 Start Conveyor
+            *   5) After 4.50 Stop Conveyor
+            *
+            *   Note(s):
+            *   Starts from bottom and ends twords top
+            */
+
+            //Sequence #1
             s_speed = SmartDashboard.getNumber("shooter",0);
 
-            if(shootTimer.get() == 0) {
-                shootTimer.start();
-                c_speed = 0;
-            } else if(shootTimer.get() >= 4.5) {
-                c_speed = 0;
-            }else if(shootTimer.get() >= 4) {
-                c_speed = -0.7;
-            } else if(shootTimer.get() >= 2.65) {
-                c_speed = 0;
-            } else if(shootTimer.get() >= 2.5) {
-                c_speed = -0.7;
+            if(as1.get() == 0) {
+                //Sequence #1
+                as1.start();
+                c_speed = Speed.STOP;
+            } else if(as1.get() >= 4.5) {
+                //Sequence #5
+                c_speed = Speed.STOP;
+            } else if(as1.get() >= 4) {
+                //Sequence #4
+                c_speed = Speed.HIGH;
+            } else if(as1.get() >= 2.65) {
+                //Sequence #3
+                c_speed = Speed.STOP;
+            } else if(as1.get() >= 2.5) {
+                //Sequence #2
+                c_speed = Speed.HIGH;
             }
+
         } else if(driver2.getRawButton(2)) {
-            c_speed = 0.2;
+            //Remove Cargo 
+            c_speed = Speed.REV;
         } else {
-            shootTimer.stop();
-            shootTimer.reset();
+            as1.stop();
+            as1.reset();
             
             if(sensor2.get()) {
                 if(timer.get() == 0) {
@@ -135,98 +272,35 @@ public class Conveyer extends SubsystemBase {
             }
 
             if(timer.get() >= 0.005) {
-                c_speed = 0;
+                c_speed = Speed.STOP;
                 timer.stop();
             } else {
                 if(!c_startup) {
-                    c_speed = -0.25;
+                    c_speed = Speed.LOW;
                 }
             }
 
-            if(!sensor3.get()) {
-                if(sensor0.get()) {
+            if(!getProxSensor(ProxSensor.STATION3)) {
+                if(getProxSensor(ProxSensor.INIT)) {
                     timer.reset();
                     c_startup = false;
                 }
             }
             
 
-            if(sensor0.get() && sensor1.get() && sensor2.get() && sensor3.get()) {
+            if(getProxSensor(ProxSensor.INIT) && 
+            getProxSensor(ProxSensor.STATION1) && 
+            getProxSensor(ProxSensor.STATION2) && 
+            getProxSensor(ProxSensor.STATION3)) {
                 timer.reset();
             }
         }
 
-        
-        
+        //Set Motor Speeds
+        setConveyerSpeed(c_speed);
+        setShooterSpeed(s_speed);
 
-
-        /* if(driver2.getRawButton(2) || timer.get() != 0) {
-            //if(timer.get() <= 500 && timer.get() != 0){
-            c_speed = -0.2;
-            //}
-        } */
-        
-        /* if(driver2.getRawButton(3)) {
-            timer.stop();
-            timer.reset();
-            c_speed = -0.3;
-        } else {
-            timer.stop();
-            timer.reset();
-        } */
-
-        /* if(driver2.getRawButton(2)) {
-            if(!beforemotor){
-                if(timer.get() == 0) {
-                    timer.start();
-                }
-            }
-            if(timer.get() >= 500) {
-                c_speed = 0;
-                timer.stop();
-                timer.reset();
-            } else if(timer.get() <= 500 && timer.get() != 0){
-                c_speed = -0.2;
-            }
-        } else  */
-
-        
-        //Shooter.set(s_speed);
-        conveyer.set(c_speed);
-
-        // if PID coefficients on SmartDashboard have changed, write new values to controller
-        m_pidController.setP(kP);
-        m_pidController.setI(kI);
-        m_pidController.setD(kD);
-        m_pidController.setIZone(kIz);
-        m_pidController.setFF(kFF);
-        m_pidController.setOutputRange(kMinOutput, kMaxOutput);
-
-    /**
-     * PIDController objects are commanded to a set point using the 
-     * SetReference() method.
-     * 
-     * The first parameter is the value of the set point, whose units vary
-     * depending on the control type set in the second parameter.
-     * 
-     * The second parameter is the control type can be set to one of four 
-     * parameters:
-     *  com.revrobotics.CANSparkMax.ControlType.kDutyCycle
-     *  com.revrobotics.CANSparkMax.ControlType.kPosition
-     *  com.revrobotics.CANSparkMax.ControlType.kVelocity
-     *  com.revrobotics.CANSparkMax.ControlType.kVoltage
-     */
-    double setPoint = s_speed*maxRPM;
-    m_pidController.setReference(setPoint, CANSparkMax.ControlType.kVelocity);
-    
-    SmartDashboard.putNumber("SetPoint", setPoint);
-    SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
+        //Send data to Dashboard
+        dashboard();
     }
-    
-    
-
-    public void setSpeed(double speed){
-         conveyer.set(speed);
-    } 
 }
-

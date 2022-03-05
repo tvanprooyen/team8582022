@@ -39,7 +39,7 @@ public class RobotContainer {
  //rivate final DefaultDriveCommand Drivetrain = new DefaultDriveCommand();
   
 
-  private final Joystick driver1 = new Joystick(0);
+  private final Joystick driver1 = new Joystick(Constants.Driver1Port);
   //private final Joystick driver2 = new Joystick(1);
 
   public RobotContainer() {
@@ -77,13 +77,10 @@ public class RobotContainer {
 
 
    /*
-
     
    
-
     //intake
     new JoystickButton(driver2,200).whileActiveOnce(new ArmPID(armcontrol, 2));
-
  
 */
  

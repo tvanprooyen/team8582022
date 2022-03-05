@@ -68,7 +68,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModule m_backRightModule;
 
 
-    private final Joystick driver1 = new Joystick(0);
+    private final Joystick driver1 = new Joystick(Driver1Port);
 
     private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -158,11 +158,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_backLeftModule.set(states[2].speedMetersPerSecond / MaxVelocity * Voltage, states[2].angle.getRadians());
         m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());
 
+        
+
         /* 
         //Depreciated Code(Incase of new doesn't work)
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MaxVelocity);
-
         double getSteerConstant = 0;
         double Kp = -0.5f;
         double min_command = 0.05f;
@@ -178,23 +179,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
         }else if (tx < 1.0){
                 steering_adjust = Kp*heading_error + min_command;
         }
-
         SmartDashboard.putNumber("tv", getLimelightTX());
-
         double Rotation0 = states[0].speedMetersPerSecond / MaxVelocity * Voltage;
         double Rotation1 = states[1].speedMetersPerSecond / MaxVelocity * Voltage;
         double Rotation2 = states[2].speedMetersPerSecond / MaxVelocity * Voltage;
         double Rotation3 = states[3].speedMetersPerSecond / MaxVelocity * Voltage;
-
         
-
         if(driver1.getRawButton(3)){
             Rotation0 += steering_adjust;
             Rotation1 -= steering_adjust;
             Rotation2 += steering_adjust;
             Rotation3 -= steering_adjust;
         }
-
         m_frontLeftModule.set(Rotation0, states[0].angle.getRadians());
         m_frontRightModule.set(Rotation1, states[1].angle.getRadians());
         m_backLeftModule.set(Rotation2, states[2].angle.getRadians());
