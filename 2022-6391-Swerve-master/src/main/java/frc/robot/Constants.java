@@ -1,7 +1,5 @@
 package frc.robot;
 
-import com.team858.control.Joystick_858;
-
 public final class Constants {
     //Joystick Ports
     public static final int Driver1Port = 0; 
@@ -77,4 +75,13 @@ public final class Constants {
     public static final int ArmMagneticLimitSwitchBottom = 9; //If Needed
     //Speeds
     public static final double ArmIntakeSpeed = -0.3;
+
+    //climbing
+    public static final int leaderID = 14;
+    public static final int followerID = 15;
+
+    //Lift
+    //Motor
+    public static final int RightLiftID = 21;
+    public static final int LeftLiftID = 22;
 }

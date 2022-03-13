@@ -5,11 +5,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController;
+import edu.wpi.first.wpilibj.AnalogInput;
 
 import static frc.robot.Constants.*;
 
@@ -22,8 +22,10 @@ public class ArmControl extends SubsystemBase {
     //private DigitalInput LimitSwitchBottom = new DigitalInput(ArmMagneticLimitSwitchBottom);
 
     private final Encoder armEncoder = new Encoder(ArmEncoderA, ArmEncoderB, ArmEncoderI, false);
-    private final Joystick driver2 = new Joystick(Driver2Port);
+    private final Joystick driver2 = new Joystick(Driver1Port);
     private final PIDController pid = new PIDController(0.004, 0, 0);
+
+    private final AnalogInput ultrasonic = new AnalogInput(0);
 
     private boolean a_start = false;
 
@@ -47,7 +49,7 @@ public class ArmControl extends SubsystemBase {
 
         //Default Start Location
         this.a_chaser = -10;
-        this.a_pickupSetpoint = -425;
+        this.a_pickupSetpoint = -550;
     }
 /*
     public void MoveArm(double ArmSpeed){
@@ -70,12 +72,29 @@ public class ArmControl extends SubsystemBase {
    */
     private double chaser(Direction direction, double rateOfChange, double chaser) {
         if(direction == Direction.UP) {
-            return chaser += rateOfChange;
+            chaser += rateOfChange;
         } else if (direction == Direction.DOWN) {
-            return chaser -= rateOfChange;
+            chaser -= rateOfChange;
         }
 
         return chaser;
+    }
+
+    public double getUSDistance(boolean METRIC) {
+        double rawValue = ultrasonic.getValue();
+        double value;
+
+        //voltage_scale_factor allows us to compensate for differences in supply voltage.
+
+        double voltage_scale_factor = 5/RobotController.getVoltage5V();
+
+        if(METRIC) {
+            value = rawValue * voltage_scale_factor * 0.125;
+        } else {
+            value = rawValue * voltage_scale_factor * 0.0492;
+        }
+
+        return value;
     }
 
     public double home() {
@@ -84,7 +103,7 @@ public class ArmControl extends SubsystemBase {
             a_start = true;
             return 0;
         } else {
-            return 0.1; // TODO May need to change value. Should drive up twords the top, at a slow speed
+            return 0.3;
         }
     }
 
@@ -92,8 +111,7 @@ public class ArmControl extends SubsystemBase {
     public void dashboard() {
         //Send Vaules to Dashboard
         //SmartDashboard.putNumber("Arm Encoder", armEncoder.get());
-
-        SmartDashboard.putBoolean("Arm Limit Switch", LimitSwitchTop.get());
+        //SmartDashboard.putBoolean("Arm Limit Switch", LimitSwitchTop.get());
     }
 
 
@@ -101,30 +119,35 @@ public class ArmControl extends SubsystemBase {
     public void periodic(){
         double armSpeed = 0;
         double armBeltSpeed = 0;
-        double rateOfChange = 0.5;
+        double rateOfChange = 1;
         double setpoint = this.a_chaser;
 
-
-        if(driver2.getRawButton(7)) {
-            armEncoder.reset(); //TODO Remove when limit switch added
-            a_start = true; //TODO Remove when limit switch added
-            
-            //armSpeed = home(); //TODO Uncomment when limit switch added
+        if(driver2.getRawButton(8)) {
+            /* if(!LimitSwitchTop.get()) {
+                armEncoder.reset();
+                a_start = true;
+                armSpeed = 0;
+            } else {
+                armSpeed = -0.2;
+            } */
+            armSpeed = -0.2;
         } else {
             //Do not allow arm to start positioning unless homed first
             if(a_start){
-                if(driver2.getRawButton(4)) {
+                if(driver2.getRawButton(5) /* && !(getUSDistance(false) <= 30 ) */) {
                     //Lower Arm to intake posistion
                     setpoint = this.a_pickupSetpoint;
-                    
+
                     //Chaser
                     if(driver2.getPOV() == 0) { // UP
                         setpoint = chaser(Direction.UP, rateOfChange, this.a_pickupSetpoint);
                     } if(driver2.getPOV() == 180) { // DOWN 
                         setpoint = chaser(Direction.DOWN, rateOfChange, this.a_pickupSetpoint);
-                    } else { //HOLD & Uses default location at first
+                    } else if (driver2.getPOV() == -1) { //HOLD & Uses default location at first
                         setpoint = chaser(Direction.NONE, 0.0, this.a_pickupSetpoint);
                     }
+
+                    this.a_pickupSetpoint = setpoint;
 
                     //Start intake
                     armBeltSpeed = ArmIntakeSpeed;
@@ -134,29 +157,49 @@ public class ArmControl extends SubsystemBase {
                         setpoint = chaser(Direction.UP, rateOfChange, this.a_chaser);
                     } if(driver2.getPOV() == 180) { // DOWN 
                         setpoint = chaser(Direction.DOWN, rateOfChange, this.a_chaser);
-                    } else { //HOLD & Uses default location at first
+                    } else if (driver2.getPOV() == -1) { //HOLD & Uses default location at first
                         setpoint = chaser(Direction.NONE, 0.0, this.a_chaser);
                     }
+
+                    this.a_chaser = setpoint;
                 }
 
                 armSpeed = -pid.calculate(armEncoder.get(), setpoint);
             }
         }
 
-        double upperLimit = 0;
-        double lowerLimit = -550; // TODO Find new Lower limit and update
+        if(!LimitSwitchTop.get()) {
+            if(!a_start){
+                armEncoder.reset();
+                a_start = true;
+                armSpeed = 0;
+            }
+        }
+
+        double upperLimit = -10;
+        double lowerLimit = -623;
 
         //Keep arm from over driving with soft stops
-        if((armEncoder.get() >= lowerLimit && armEncoder.get() <= upperLimit) /* TODO Uncomment when limit switch added : || LimitSwitchTop.get() */) {
-            /* 
-            Not Done Yet!
-            double armSpeedTemp = -pid.calculate(armEncoder.get(), chaser(Direction.NONE, 0.0));
+        if(a_start || (armEncoder.get() >= lowerLimit && armEncoder.get() <= upperLimit) /* TODO Uncomment when limit switch added : || LimitSwitchTop.get() */) {
+            //SmartDashboard.putBoolean("Limit Hit", true);
+            
+            /* double armSpeedTemp = -pid.calculate(armEncoder.get(), chaser(Direction.NONE, 0.0));
             if (armEncoder.get() >= lowerLimit) {
                 if(!(armEncoder.get() >= setpoint)) {
-                    armSpeed = armSpeedTemp;
+                    //armSpeed = armSpeedTemp;
                 }
             } */
+            
+        } else {
+            //SmartDashboard.putBoolean("Limit Hit", false);
         }
+
+        /* if(armSpeed != 0) {
+            if(Arm.getEncoder().getVelocity() >= 10) {
+                armSpeed = 0;
+                System.out.println("Motor Stalled");
+            }
+        } */
         
         Arm.set(armSpeed);
         Armbelt.set(armBeltSpeed);

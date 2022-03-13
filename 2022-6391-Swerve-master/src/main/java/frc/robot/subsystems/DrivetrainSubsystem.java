@@ -1,4 +1,3 @@
-
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -9,7 +8,6 @@ import com.kauailabs.navx.frc.AHRS;
 import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
-import com.team858.control.Joystick_858;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,18 +19,26 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 import static frc.robot.Constants.*;
 
-import java.util.function.DoubleSupplier;
-
 public class DrivetrainSubsystem extends SubsystemBase {
   
+    public enum Limelight {
+        TX(0), TY(1), TA(2), TV(3);
+    
+        private final int value;
+        private Limelight(int value) {
+            this.value = value;
+        }
+    
+        public int getValue() {
+            return value;
+        }
+    }
     
 
     //Voltage of the battery
@@ -90,13 +96,29 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_navx.zeroYaw();
     }
 
-    public double getLimelightTX(){
-        double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
-        double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
-        double ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
-        double ta = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
 
-        return tx;
+
+    public double getLimelight(Limelight LL){
+        double value = 0;
+
+        switch (LL) {
+            case TX:
+            value = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+                break;
+            case TY:
+            value = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+                break;
+            case TA:
+            value = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
+                break;
+            case TV:
+            value = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
+                break;
+
+            default:
+                break;
+        }
+        return value;
     }
 
     //gyro rotation
@@ -115,12 +137,19 @@ public class DrivetrainSubsystem extends SubsystemBase {
     
     public double injectedRotation(int m_axis, int m_trackButton) {
         //Constants
-        double getSteerConstant = 0;
-        double Kp = SmartDashboard.getNumber("Kp",-0.05f);
-        double min_command = SmartDashboard.getNumber("min",0.05f);
+        //double getSteerConstant = 0;
+        double min_command = 0.02f;
+
+        double joyAxisAvg = Math.abs((driver1.getRawAxis(0) + driver1.getRawAxis(1) + driver1.getRawAxis(4))/3);
+
+        double Kp = -0.1 * joyAxisAvg - 0.06;
+
+        /* if(driver1.getRawAxis(0) > 0.1 || driver1.getRawAxis(1) > 0.1 || driver1.getRawAxis(4) > 0.1) {
+            Kp = -0.085f;
+        } */
          
         //Target
-        double tx = getLimelightTX();
+        double tx = getLimelight(Limelight.TX);
          
         //PID
         double heading_error = -tx;
@@ -132,21 +161,32 @@ public class DrivetrainSubsystem extends SubsystemBase {
         }
 
         //Post to Dashboard
-        SmartDashboard.putNumber("tv", getLimelightTX());
+        SmartDashboard.putNumber("tx", getLimelight(Limelight.TX));
 
         //Default to JoyStick
-        double Rotation;
+        double Rotation = driver1.getRawAxis(m_axis);
 
         //Activly adjust twords target
         if(driver1.getRawButton(m_trackButton)){
-            Rotation = steering_adjust;
+            Rotation += steering_adjust;
+           // NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
         } else {
-            Rotation = driver1.getRawAxis(m_axis);
+            //Rotation = driver1.getRawAxis(m_axis);
+           // NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
         }
 
         return Rotation;
     }
 
+    public double getAverageEncoder(){
+        double avg = (m_backLeftModule.getDriveVelocity()+
+        m_backRightModule.getDriveVelocity()+
+        m_frontLeftModule.getDriveVelocity()+
+        m_frontRightModule.getDriveVelocity())/4;
+        return avg;
+    }
+
+    
 
     @Override
     public void periodic() {
@@ -158,8 +198,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_backLeftModule.set(states[2].speedMetersPerSecond / MaxVelocity * Voltage, states[2].angle.getRadians());
         m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());
 
+       
         
-
+        NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
         /* 
         //Depreciated Code(Incase of new doesn't work)
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);

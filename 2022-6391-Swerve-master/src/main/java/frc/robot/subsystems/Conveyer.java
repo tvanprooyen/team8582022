@@ -27,7 +27,7 @@ public class Conveyer extends SubsystemBase {
     private final CANSparkMax shooter = new CANSparkMax(ShooterID,MotorType.kBrushless);
 
     //Timers
-    private final Joystick driver2 = new Joystick(Driver2Port);
+    private final Joystick driver2 = new Joystick(Driver1Port);
     private final Timer timer = new Timer();
     private final Timer as1 = new Timer();
 
@@ -196,7 +196,7 @@ public class Conveyer extends SubsystemBase {
         double distance;
 
         double a2 = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
-        distance = (101-44)/(Math.tan((Math.PI/180)*(20+a2)));
+        distance = (101.75-44.125)/(Math.tan((Math.PI/180)*(20+a2)));
 
        return distance;
     }
@@ -225,7 +225,9 @@ public class Conveyer extends SubsystemBase {
         Speed c_speed = Speed.STOP;
         double s_speed = 0;
 
-        if(driver2.getRawButton(1)){
+
+
+        if(driver2.getRawButton(6)){
             /*  Automated Sequence # 1
             *   1) Start Shooter, Stop Conveyor, Start Timer
             *   2) After 2.50 Start Conveyor
@@ -238,22 +240,32 @@ public class Conveyer extends SubsystemBase {
             */
 
             //Sequence #1
-            s_speed = SmartDashboard.getNumber("shooter",0);
+            //s_speed = SmartDashboard.getNumber("shooter",0);
+
+            //linear line
+            double minspeed = 3.6;
+            double maxspeed = 5.04;
+            double mindist = 100;
+            double maxdist = 180;
+            double slope = (maxspeed-minspeed)/(maxdist-mindist);
+           s_speed = (slope*GetDistance()) - (slope*mindist) + minspeed;
+           // s_speed = SmartDashboard.getNumber("shooter", 0);
+            
 
             if(as1.get() == 0) {
                 //Sequence #1
                 as1.start();
                 c_speed = Speed.STOP;
-            } else if(as1.get() >= 4.5) {
+            } else if(as1.get() >= 2) {
                 //Sequence #5
                 c_speed = Speed.STOP;
-            } else if(as1.get() >= 4) {
+            } else if(as1.get() >= 1.5) {
                 //Sequence #4
                 c_speed = Speed.HIGH;
-            } else if(as1.get() >= 2.65) {
+            } else if(as1.get() >= 0.90) {
                 //Sequence #3
                 c_speed = Speed.STOP;
-            } else if(as1.get() >= 2.5) {
+            } else if(as1.get() >= 0.8) {
                 //Sequence #2
                 c_speed = Speed.HIGH;
             }
