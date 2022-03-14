@@ -1,6 +1,8 @@
 
 package frc.robot.commands;
 
+import com.team858.control.LimeLight;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -14,6 +16,8 @@ public class AutoDrive extends CommandBase {
     private final Conveyer m_conveyer;
     private final Timer timer = new Timer();
     private final Timer as1 = new Timer();
+    private final LimeLight limeLight = new LimeLight(-0.07f, 0.02f, //Steer PID
+                                                        44.125, 101.75, 20); // Target Distance
 
     public enum AutoMode {
         NONE(0), AutoMode1(1), AutoMode2(2), AutoMode3(3);
@@ -64,40 +68,22 @@ public class AutoDrive extends CommandBase {
         double mindist = 100;
         double maxdist = 180;
         double slope = (maxspeed-minspeed)/(maxdist-mindist);
-        double s_speed = (slope*GetDistance()) - (slope*mindist) + minspeed;
-        /* if(timer.get() < 15) {
-            drive(0, 0, 0);
-        }*/ if(timer.get() < 2) {
+        double s_speed = (slope*limeLight.getDistance()) - (slope*mindist) + minspeed;
+
+
+        if(timer.get() < 2) {
             drive(-40, 0, 0);
             c_speed = Conveyer.Speed.STOP;
             s_speed = 0;
         } else if(timer.get() < 4) {
 
-            double Kp = -0.07f;
-            double min_command = 0.02f;
-
-            double Rotation = 0;
-            
-            //Target
-            double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
-            
-            //PID
-            double heading_error = -tx;
-            double steering_adjust = 0.0f;
-            if (tx > 1.0){
-                    steering_adjust = Kp*heading_error - min_command;
-            }else if (tx < 1.0){
-                    steering_adjust = Kp*heading_error + min_command;
-            }
-            Rotation -= steering_adjust;
-
-            drive(0, 0, Rotation * DrivetrainSubsystem.MaxVelocity);
+            drive(0, 0, limeLight.trackTarget(0) * DrivetrainSubsystem.MaxVelocity);
             c_speed = Conveyer.Speed.STOP;
             s_speed = 0;
-        }else if(timer.get() < 4.5) {
+        } else if(timer.get() < 4.5) {
             //Sequence #1
             drive(0, 0, 0);
-            s_speed = (slope*GetDistance()) - (slope*mindist) + minspeed;
+            s_speed = (slope*limeLight.getDistance()) - (slope*mindist) + minspeed;
             c_speed = Conveyer.Speed.STOP;
          } else if(timer.get() <= 5.8) {
             //Sequence #2
@@ -122,48 +108,5 @@ public class AutoDrive extends CommandBase {
         timer.reset();
         as1.stop();
         as1.reset();
-    }
-
-    public double GetDistance(){
-        double distance;
-
-        double a2 = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
-        distance = (101.75-44.125)/(Math.tan((Math.PI/180)*(20+a2)));
-
-       return distance;
-    }
-
-    public double trackTarget(double m_axis) {
-        //Constants
-        //double getSteerConstant = 0;
-        double Kp = -0.085f;
-        double min_command = 0.02f;
-
-        double joyAxisAvg = Math.abs(m_axis);
-
-        /* if(driver1.getRawAxis(0) > 0.1 || driver1.getRawAxis(1) > 0.1 || driver1.getRawAxis(4) > 0.1) {
-            Kp = -0.085f;
-        } */
-         
-        //Target
-        double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
-         
-        //PID
-        double heading_error = -tx;
-        double steering_adjust = 0.0f;
-        if (tx > 1.0){
-                steering_adjust = Kp*heading_error - min_command;
-        }else if (tx < 1.0){
-                steering_adjust = Kp*heading_error + min_command;
-        }
-
-        //Post to Dashboard
-
-        //Default to JoyStick
-        double Rotation = m_axis;
-
-        Rotation -= steering_adjust;
-
-        return Rotation;
     }
 }

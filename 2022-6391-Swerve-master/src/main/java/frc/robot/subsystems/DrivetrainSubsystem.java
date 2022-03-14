@@ -179,10 +179,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public double getAverageEncoder(){
-        double avg = (m_backLeftModule.getDriveVelocity()+
-        m_backRightModule.getDriveVelocity()+
-        m_frontLeftModule.getDriveVelocity()+
-        m_frontRightModule.getDriveVelocity())/4;
+        double avg = (m_backLeftModule.getStatePosistion()+
+        m_backRightModule.getStatePosistion()+
+        m_frontLeftModule.getStatePosistion()+
+        m_frontRightModule.getStatePosistion())/4;
         return avg;
     }
 
@@ -197,8 +197,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_frontRightModule.set(states[1].speedMetersPerSecond / MaxVelocity * Voltage, states[1].angle.getRadians());
         m_backLeftModule.set(states[2].speedMetersPerSecond / MaxVelocity * Voltage, states[2].angle.getRadians());
         m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());
-
-       
         
         NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
         /* 
