@@ -45,9 +45,6 @@ public class RobotContainer {
                 () -> -(ControlMathUtil.modifyAxis(m_drivetrainSubsystem.injectedRotation(4,3),Constants.deadband) * DrivetrainSubsystem.MaxAngularVelocity) * 0.3,
                 () -> driver1.getRawButton(10)
         ));
-       
-    
-
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -60,28 +57,6 @@ public class RobotContainer {
         new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
 
     
-    }
-
-    public static double deadband(double value, double deadband) {
-        if (Math.abs(value) > deadband) {
-        if (value > 0.0) {
-            return (value - deadband) / (1.0 - deadband);
-        } else {
-            return (value + deadband) / (1.0 - deadband);
-        }
-        } else {
-        return 0.0;
-        }
-    }
-
-    public static double modifyAxis(double value, double deadband) {
-        // Deadband
-        value = deadband(value, deadband);
-
-        // Square the axis
-        value = Math.copySign(value * value, value);
-
-        return value;
     }
 
     public Command getAutonomousCommand() {

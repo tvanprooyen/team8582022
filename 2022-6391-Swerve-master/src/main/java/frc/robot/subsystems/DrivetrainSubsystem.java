@@ -179,10 +179,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public double getAverageEncoder(){
-        double avg = (m_backLeftModule.getStatePosistion()+
-        m_backRightModule.getStatePosistion()+
-        m_frontLeftModule.getStatePosistion()+
-        m_frontRightModule.getStatePosistion())/4;
+        double avg = (m_backLeftModule.getDrivePosistion()+
+        m_backRightModule.getDrivePosistion()+
+        m_frontLeftModule.getDrivePosistion()+
+        m_frontRightModule.getDrivePosistion())/4;
         return avg;
     }
 

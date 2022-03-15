@@ -16,7 +16,7 @@ public class AutoDrive extends CommandBase {
     private final Conveyer m_conveyer;
     private final Timer timer = new Timer();
     private final Timer as1 = new Timer();
-    private final LimeLight limeLight = new LimeLight(-0.07f, 0.02f, //Steer PID
+    private final LimeLight limeLight = new LimeLight(-0.07f, 0.02f, //Target Steer PID
                                                         44.125, 101.75, 20); // Target Distance
 
     public enum AutoMode {

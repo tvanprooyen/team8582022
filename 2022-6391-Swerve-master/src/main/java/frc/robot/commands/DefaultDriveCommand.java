@@ -45,10 +45,12 @@ public class DefaultDriveCommand extends CommandBase {
         double y = m_translationYSupplier.getAsDouble();
         double rotation = m_rotationSupplier.getAsDouble();
 
-        if(stop.getRawButton(1)) {
-            x = 0;
-            y = 0;
-            rotation = 0;
+        if(stop.isConnected()) {
+            if(stop.getRawButton(1)) {
+                x = 0;
+                y = 0;
+                rotation = 0;
+            }
         }
 
         m_drivetrainSubsystem.drive(
