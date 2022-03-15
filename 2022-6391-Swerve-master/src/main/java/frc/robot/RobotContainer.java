@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.AutoDrive;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.ArmControl;
+import frc.robot.subsystems.ClimbingSubsys;
 import frc.robot.subsystems.Conveyer;
 import frc.robot.subsystems.Conveyer;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -25,6 +26,7 @@ public class RobotContainer {
     private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
     private final Conveyer convey = new Conveyer();
     private final ArmControl armControl = new ArmControl();
+    private final ClimbingSubsys climb = new ClimbingSubsys();
     private final SlewRateLimiter xLimit = new SlewRateLimiter(300);
     private final SlewRateLimiter yLimit = new SlewRateLimiter(300);
 

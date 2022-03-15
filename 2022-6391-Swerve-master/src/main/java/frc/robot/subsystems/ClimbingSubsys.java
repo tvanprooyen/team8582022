@@ -26,6 +26,9 @@ public class ClimbingSubsys extends SubsystemBase {
     public ClimbingSubsys() {
         m_leftForwardLimit = leftLiftMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
         m_rightForwardLimit = rightLiftMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+
+        //leftLiftMotor.getEncoder().setPosition(0);
+        //leftLiftMotor.getEncoder().setPosition(0);
     }
 
     public double getRightEncoder() {
@@ -60,18 +63,29 @@ public class ClimbingSubsys extends SubsystemBase {
         double rightEncoder = getRightEncoder();
         boolean leftLimit = getLeftLimitSwitch();
         double leftEncoder = getLeftEncoder();
-        double leftMotorSpeed = driver1.getRawAxis(0);
-        double rightMotorSpeed = driver1.getRawAxis(0);
+
+
+        double axis = driver1.getRawAxis(2) + (-1 * driver1.getRawAxis(3));
+
+
+        double leftMotorSpeed = axis;
+        double rightMotorSpeed = axis;
+
+
+        /* if(driver1.getRawAxis(2) > 0.2) {
+            leftMotorSpeed = 0.5;
+            rightMotorSpeed = 0.5; 
+        } else if(driver1.getRawAxis(3) > 0.2) {
+            leftMotorSpeed = -0.5;
+            rightMotorSpeed = -0.5; 
+        } */
+
+
         
         //-490
-        boolean rightHighLimit = rightEncoder <= -490;
+        /* boolean rightHighLimit = rightEncoder <= -290;
         if(rightLimit){
             rightLiftMotor.getEncoder().setPosition(0);
-        }
-
-        boolean leftHighLimit = leftEncoder <= -490;
-        if(leftLimit){
-            leftLiftMotor.getEncoder().setPosition(0);
         }
 
         if(driver1.getRawButton(1)) {
@@ -83,12 +97,16 @@ public class ClimbingSubsys extends SubsystemBase {
         }
         } else {
             rightMotorSpeed = 0;
-        }
+        } */
         rightLiftMotor.set(rightMotorSpeed);
 
+        /* boolean leftHighLimit = leftEncoder <= -290;
+        if(leftLimit){
+            leftLiftMotor.getEncoder().setPosition(0);
+        }
 
         if(driver1.getRawButton(1)) {
-            if(rightLimit && leftMotorSpeed > 0) {
+            if(leftLimit && leftMotorSpeed > 0) {
                 leftMotorSpeed = 0;
             } 
             if(leftHighLimit && leftMotorSpeed < 0) {
@@ -96,9 +114,9 @@ public class ClimbingSubsys extends SubsystemBase {
             }
             } else {
                 leftMotorSpeed = 0;
-            }
-            //rightEncoder >= -490 || 
-            leftLiftMotor.set(leftMotorSpeed);
+            } */
+            //rightEncoder >= -490 ||
+            leftLiftMotor.set(leftMotorSpeed); 
         dashboard();
     }
 }
