@@ -57,11 +57,6 @@ public class SwerveModuleFactory<DriveConfiguration, SteerConfiguration> {
         }
 
         @Override
-        public void resetEncoder() {
-            driveController.resetEncoder();
-        }
-
-        @Override
         public double getSteerAngle() {
             return steerController.getStateAngle();
         }

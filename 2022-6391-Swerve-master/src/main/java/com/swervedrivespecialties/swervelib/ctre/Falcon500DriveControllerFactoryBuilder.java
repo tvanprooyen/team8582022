@@ -106,5 +106,12 @@ public final class Falcon500DriveControllerFactoryBuilder {
         public double getStatePosistion() {
             return motor.getSelectedSensorPosition();
         }
+
+        @Override
+        public void resetEncoder() {
+            motor.setSelectedSensorPosition(0);
+        }
+
+        
     }
 }

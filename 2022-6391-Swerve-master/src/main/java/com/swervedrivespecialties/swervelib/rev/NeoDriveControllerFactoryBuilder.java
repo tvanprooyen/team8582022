@@ -90,7 +90,7 @@ public final class NeoDriveControllerFactoryBuilder {
 
         @Override
         public void resetEncoder() {
-            encoder.reset();
+            encoder.setPosition(0);
         }
     }
 }

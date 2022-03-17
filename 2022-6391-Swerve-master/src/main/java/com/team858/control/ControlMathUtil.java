@@ -1,6 +1,7 @@
 package com.team858.control;
 
 public class ControlMathUtil {
+  
     //dead band functions
     public static double deadband(double value, double deadband) {
         if (Math.abs(value) > deadband) {
@@ -31,7 +32,7 @@ public class ControlMathUtil {
        * @param rateOfChange How much is added to the old setpoint
        * @return The next setpoint
        */
-      public double chaser(enums.Direction direction, double rateOfChange, double chaser) {
+      /* public double chaser(enums.Direction direction, double rateOfChange, double chaser) {
         if(direction == enums.Direction.UP) {
             chaser += rateOfChange;
         } else if (direction == enums.Direction.DOWN) {
@@ -39,5 +40,5 @@ public class ControlMathUtil {
         }
 
         return chaser;
-    }
+    } */
 }

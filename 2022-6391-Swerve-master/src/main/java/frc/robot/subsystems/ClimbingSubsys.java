@@ -5,9 +5,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.team858.control.enums.Direction;
 
 import frc.robot.Constants;
 
@@ -98,6 +98,7 @@ public class ClimbingSubsys extends SubsystemBase {
         boolean topLimit, bottomLimit;
         CANSparkMax liftMotor;
         PIDController pidController;
+        RelativeEncoder encoder;
 
         //Settings
         switch (direction) {
