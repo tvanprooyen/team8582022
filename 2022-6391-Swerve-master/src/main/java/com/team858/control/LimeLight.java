@@ -112,6 +112,21 @@ public class LimeLight {
         }
     }
 
+
+    /**
+     * Turns the leds on and off
+     * 
+     * @param mode true for on; false for Off
+     */
+    public void swtichLight(boolean mode) {
+        int data = 1;
+        if(mode) {
+            data = 3;
+        }
+
+        setLimeLight(CONTROLS.LEDMODE, data);
+    }
+
     /**
    * Gets Limelight Data
    *

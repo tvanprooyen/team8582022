@@ -51,12 +51,8 @@ public class RobotContainer {
 
 
     private void configureButtonBindings() {
-    
-    
         //reset gyro
         new JoystickButton(driver1,7).whenPressed(m_drivetrainSubsystem::zeroGyroscope);
-
-    
     }
 
     public Command getAutonomousCommand() {

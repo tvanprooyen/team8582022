@@ -23,4 +23,21 @@ public class ControlMathUtil {
     
         return value;
       }
+
+       /**
+       * Allows user to manually change a PID setpoint
+       *
+       * @param direction Direction UP(plus), DOWN(minus), NONE(nothing happens)
+       * @param rateOfChange How much is added to the old setpoint
+       * @return The next setpoint
+       */
+      public double chaser(enums.Direction direction, double rateOfChange, double chaser) {
+        if(direction == enums.Direction.UP) {
+            chaser += rateOfChange;
+        } else if (direction == enums.Direction.DOWN) {
+            chaser -= rateOfChange;
+        }
+
+        return chaser;
+    }
 }
