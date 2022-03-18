@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxLimitSwitch;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import frc.robot.Constants;
@@ -40,16 +41,19 @@ public class ClimbingSubsys extends SubsystemBase {
         m_leftForwardLimit = leftLiftMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
         m_rightForwardLimit = rightLiftMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
-        C_setpointLeft = leftLiftMotor.getEncoder().getPosition();
-        C_setpointRight = rightLiftMotor.getEncoder().getPosition();
+        leftLiftMotor.setIdleMode(IdleMode.kBrake);
+        rightLiftMotor.setIdleMode(IdleMode.kBrake);
+
+        this.C_setpointLeft = leftLiftMotor.getEncoder().getPosition();
+        this.C_setpointRight = rightLiftMotor.getEncoder().getPosition();
     }
 
     public double getRightEncoder() {
-        return leftLiftMotor.getEncoder().getPosition();
+        return rightLiftMotor.getEncoder().getPosition();
     }
 
     public double getLeftEncoder() {
-        return rightLiftMotor.getEncoder().getPosition();
+        return leftLiftMotor.getEncoder().getPosition();
     }
 
     public boolean getRightLimitSwitch() {
@@ -57,11 +61,11 @@ public class ClimbingSubsys extends SubsystemBase {
     }
 
     public boolean getRightSoftLimit() {
-        return getRightEncoder() <= -450;
+        return getRightEncoder() <= -485;
     }
 
     public boolean getLeftSoftLimit() {
-        return getLeftEncoder() <= -450;
+        return getLeftEncoder() <= -485;
     }
 
     public boolean getLeftLimitSwitch() {
@@ -159,22 +163,27 @@ public class ClimbingSubsys extends SubsystemBase {
     public void periodic() {
         double rateOfChange = 1;
 
-        double axisRight = chaser(Direction.UP, driver1.getRawAxis(2) * rateOfChange, this.C_setpointRight) + chaser(Direction.DOWN, driver1.getRawAxis(3) * rateOfChange, this.C_setpointRight);
+        /* double axisRight = chaser(Direction.UP, driver1.getRawAxis(2) * rateOfChange, this.C_setpointRight) + chaser(Direction.DOWN, driver1.getRawAxis(3) * rateOfChange, this.C_setpointRight);
         double axisLeft = chaser(Direction.UP, driver1.getRawAxis(2) * rateOfChange, this.C_setpointLeft) + chaser(Direction.DOWN, driver1.getRawAxis(3) * rateOfChange, this.C_setpointLeft);
 
-        runClimbSystem(axisLeft, driver1.getRawButton(1), Direction.LEFT);
-        runClimbSystem(axisRight, driver1.getRawButton(1), Direction.RIGHT);
+        //runClimbSystem(axisLeft, driver1.getRawButton(1), Direction.LEFT);
+        runClimbSystem(axisRight, driver1.getRawButton(1), Direction.RIGHT); */
 
+        
         dashboard();
+        double driveAxis = driver1.getRawAxis(2) - driver1.getRawAxis(3);
+
+        double rightMotorSpeed = driveAxis;
+        double leftMotorSpeed = driveAxis;
 
         //Old Code to fall back on too
-        /* //Right
-        if(getRightSoftLimit()){
+         //Right
+        if(getRightLimitSwitch()){
             rightLiftMotor.getEncoder().setPosition(0);
         }
 
         if(driver1.getRawButton(1)) {
-            if(getRightSoftLimit() && rightMotorSpeed > 0) {
+            if(getRightLimitSwitch() && rightMotorSpeed > 0) {
                 rightMotorSpeed = 0;
             } 
             if(getRightSoftLimit() && rightMotorSpeed < 0) {
@@ -203,6 +212,6 @@ public class ClimbingSubsys extends SubsystemBase {
                 leftMotorSpeed = 0;
         }
         
-        leftLiftMotor.set(leftMotorSpeed); */
+        leftLiftMotor.set(leftMotorSpeed);
     }
 }

@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -49,7 +50,7 @@ public class ArmControl extends SubsystemBase {
 
         //Default Start Location
         this.a_chaser = -10;
-        this.a_pickupSetpoint = -550;
+        this.a_pickupSetpoint = -470; //-550
     }
 /*
     public void MoveArm(double ArmSpeed){
@@ -110,7 +111,7 @@ public class ArmControl extends SubsystemBase {
 
     public void dashboard() {
         //Send Vaules to Dashboard
-        //SmartDashboard.putNumber("Arm Encoder", armEncoder.get());
+        SmartDashboard.putNumber("Arm Encoder", armEncoder.get());
         //SmartDashboard.putBoolean("Arm Limit Switch", LimitSwitchTop.get());
     }
 
