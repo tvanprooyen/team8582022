@@ -32,6 +32,8 @@ public class ArmControl extends SubsystemBase {
 
     private double a_chaser, a_pickupSetpoint;
 
+    private boolean enableTeleop;
+
     //Directon Enum
     public enum Direction {
         NONE(0), UP(1), RIGHT(2), DOWN(3), LEFT(4);
@@ -51,6 +53,7 @@ public class ArmControl extends SubsystemBase {
         //Default Start Location
         this.a_chaser = -10;
         this.a_pickupSetpoint = -470; //-550
+        this.enableTeleop = true;
     }
 /*
     public void MoveArm(double ArmSpeed){
@@ -63,6 +66,28 @@ public class ArmControl extends SubsystemBase {
     public CANSparkMax getMotor(){
         return Arm;
     }*/
+
+    public void setDriveArmMotor(Boolean up) {
+        double speed = 0;
+        if(up) {
+            speed = -pid.calculate(armEncoder.get(), this.a_chaser);
+        } else {
+            speed = -pid.calculate(armEncoder.get(), this.a_pickupSetpoint);
+        }
+        Arm.set(speed);
+    }
+
+    public void setDriveArmIntakeMotor(double speed) {
+        Armbelt.set(speed);
+    }
+
+    public void enableTeleop(boolean enable) {
+        this.enableTeleop = enable;
+    }
+
+    public boolean getEnableTeleop() {
+        return this.enableTeleop;
+    }
 
     /**
    * Allows user to manually change a PID setpoint
@@ -112,16 +137,20 @@ public class ArmControl extends SubsystemBase {
     public void dashboard() {
         //Send Vaules to Dashboard
         SmartDashboard.putNumber("Arm Encoder", armEncoder.get());
-        //SmartDashboard.putBoolean("Arm Limit Switch", LimitSwitchTop.get());
+        SmartDashboard.putBoolean("Arm Limit Switch", LimitSwitchTop.get());
+        SmartDashboard.putNumber("Distance Measure", getUSDistance(false));
     }
-
 
     @Override
     public void periodic(){
         double armSpeed = 0;
         double armBeltSpeed = 0;
-        double rateOfChange = 1;
+        double rateOfChange = 2;
         double setpoint = this.a_chaser;
+
+        if(driver2.getPOV() == 90) {
+            //a_start = true;
+        }
 
         if(driver2.getRawButton(8)) {
             /* if(!LimitSwitchTop.get()) {
@@ -169,10 +198,11 @@ public class ArmControl extends SubsystemBase {
             }
         }
 
-        if(!LimitSwitchTop.get()) {
-            if(!a_start){
+        if(LimitSwitchTop.get()) {
                 armEncoder.reset();
                 a_start = true;
+        } else {
+            if(!a_start){
                 armSpeed = 0;
             }
         }
@@ -202,8 +232,11 @@ public class ArmControl extends SubsystemBase {
             }
         } */
         
-        Arm.set(armSpeed);
-        Armbelt.set(armBeltSpeed);
+        if(getEnableTeleop()) {
+            Arm.set(armSpeed);
+            Armbelt.set(armBeltSpeed);
+        }
+        
 
         dashboard();
     }

@@ -130,6 +130,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return Rotation2d.fromDegrees(360.0 - m_navx.getYaw());
     }
 
+    public float getGyro() {
+        return m_navx.getYaw();
+    }
+
     public void drive(ChassisSpeeds chassisSpeeds) {
         m_chassisSpeeds = chassisSpeeds;
     }
@@ -186,10 +190,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return avg;
     }
 
+    private void dashboard() {
+        SmartDashboard.putNumber("Gyro", getGyro());
+    }
     
 
     @Override
     public void periodic() {
+        dashboard();
+
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MaxVelocity);
 

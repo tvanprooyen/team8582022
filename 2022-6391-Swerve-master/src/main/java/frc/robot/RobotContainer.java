@@ -56,6 +56,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new AutoDrive(m_drivetrainSubsystem, convey);
+        return new AutoDrive(m_drivetrainSubsystem, convey, armControl);
     }
 }

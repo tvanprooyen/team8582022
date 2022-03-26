@@ -66,6 +66,8 @@ public class Conveyer extends SubsystemBase {
     private RelativeEncoder m_encoder;
     public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
 
+    private boolean enableTeleop;
+
     public Conveyer(){
         SmartDashboard.putNumber("shooter",7);
 
@@ -98,6 +100,16 @@ public class Conveyer extends SubsystemBase {
         m_pidController.setIZone(kIz);
         m_pidController.setFF(kFF);
         m_pidController.setOutputRange(kMinOutput, kMaxOutput);
+
+        this.enableTeleop = true;
+    }
+
+    public void enableTeleop(boolean enable) {
+        this.enableTeleop = enable;
+    }
+
+    public boolean getEnableTeleop() {
+        return this.enableTeleop;
     }
 
     public boolean getProxSensor0() {
@@ -250,6 +262,10 @@ public class Conveyer extends SubsystemBase {
             double slope = (maxspeed-minspeed)/(maxdist-mindist);
            s_speed = (slope*GetDistance()) - (slope*mindist) + minspeed;
            // s_speed = SmartDashboard.getNumber("shooter", 0);
+
+           if(driver2.getPOV() == 270) {
+               s_speed = 3.75;
+           }
             
 
             if(as1.get() == 0) {
@@ -307,10 +323,12 @@ public class Conveyer extends SubsystemBase {
                 timer.reset();
             }
         }
-
-        //Set Motor Speeds
         setConveyerSpeed(c_speed);
-        setShooterSpeed(s_speed);
+        //Set Motor Speeds
+        if(getEnableTeleop()) {
+            setShooterSpeed(s_speed);
+        }
+        
 
         //Send data to Dashboard
         dashboard();

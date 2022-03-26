@@ -79,7 +79,7 @@ public class ClimbingSubsys extends SubsystemBase {
    * @param rateOfChange How much is added to the old setpoint
    * @return The next setpoint
    */
-    private double chaser(Direction direction, double rateOfChange, double chaser) {
+    public double chaser(Direction direction, double rateOfChange, double chaser) {
         if(direction == Direction.UP) {
             chaser += rateOfChange;
         } else if (direction == Direction.DOWN) {
@@ -96,7 +96,7 @@ public class ClimbingSubsys extends SubsystemBase {
      * @param button Saftey button
      * @param direction What side of robot to control
      */
-    private void runClimbSystem(double setpoint, Boolean button, Direction direction) {
+    public void runClimbSystem(double setpoint, Boolean button, Direction direction) {
 
         double masterSetpoint, encoderPos;
         boolean topLimit, bottomLimit;
@@ -161,7 +161,7 @@ public class ClimbingSubsys extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double rateOfChange = 1;
+        //double rateOfChange = 1;
 
         /* double axisRight = chaser(Direction.UP, driver1.getRawAxis(2) * rateOfChange, this.C_setpointRight) + chaser(Direction.DOWN, driver1.getRawAxis(3) * rateOfChange, this.C_setpointRight);
         double axisLeft = chaser(Direction.UP, driver1.getRawAxis(2) * rateOfChange, this.C_setpointLeft) + chaser(Direction.DOWN, driver1.getRawAxis(3) * rateOfChange, this.C_setpointLeft);
@@ -171,7 +171,7 @@ public class ClimbingSubsys extends SubsystemBase {
 
         
         dashboard();
-        double driveAxis = driver1.getRawAxis(2) - driver1.getRawAxis(3);
+        double driveAxis = 0.9 * (driver1.getRawAxis(2) - driver1.getRawAxis(3));
 
         double rightMotorSpeed = driveAxis;
         double leftMotorSpeed = driveAxis;
