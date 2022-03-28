@@ -7,11 +7,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ArmControl;
 import frc.robot.subsystems.Conveyer;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.DrivetrainSubsystem.Limelight;
 
 public class AutoDrive extends CommandBase {
     private final DrivetrainSubsystem m_drivetrainSubsystem;
@@ -22,6 +22,8 @@ public class AutoDrive extends CommandBase {
     private final Timer as1 = new Timer();
     private final LimeLight limeLight = new LimeLight(-0.02f, 0.02f, //Target Steer PID
                                                         44.125, 101.75, 20); // Target Distance
+    
+    private final SendableChooser<Integer> m_chooser;
 
     private float masterAngle;
     
@@ -40,10 +42,12 @@ public class AutoDrive extends CommandBase {
 
     public AutoDrive(DrivetrainSubsystem drivetrainSubsystem,
                                Conveyer conveyer, 
-                               ArmControl arm) {
+                               ArmControl arm,
+                               SendableChooser<Integer> chooser) {
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_conveyer = conveyer;
         this.m_arm = arm;
+        this.m_chooser = chooser;
         addRequirements(drivetrainSubsystem);
         addRequirements(conveyer);
         addRequirements(arm);
@@ -101,7 +105,7 @@ public class AutoDrive extends CommandBase {
         float gyro = m_drivetrainSubsystem.getGyro();
 
         if(timer.get() < 0.75) {
-            drive(-20, 0, -gyroPID.calculate(gyro, this.masterAngle) * m_drivetrainSubsystem.MaxAngularVelocity, true);
+            drive(-20, 0, -gyroPID.calculate(gyro, this.masterAngle) * DrivetrainSubsystem.MaxAngularVelocity, true);
             c_speed = Conveyer.Speed.STOP;
         } /* if(timer.get() < 2) {
             
@@ -129,8 +133,8 @@ public class AutoDrive extends CommandBase {
         m_conveyer.setShooterSpeed(s_speed);
     }
 
-    @Override
-    public void execute() {
+
+    private void auto2() {
         Conveyer.Speed c_speed = Conveyer.Speed.STOP;
 
         //linear line
@@ -189,6 +193,24 @@ public class AutoDrive extends CommandBase {
         m_arm.setDriveArmIntakeMotor(intake);
 
         drive(x, y, rotation, robotOrt); 
+    }
+
+    @Override
+    public void execute() {
+
+        //Select Autp
+        //TODO Make sure this works!
+        switch (m_chooser.getSelected()) {
+            case 0:
+                auto1();
+                break;
+            case 1:
+                auto2();
+                break;
+        
+            default:
+                return;
+        }
     }
 
     @Override

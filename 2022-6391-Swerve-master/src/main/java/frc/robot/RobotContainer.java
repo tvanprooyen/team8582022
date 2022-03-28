@@ -10,6 +10,8 @@ import com.team858.control.ControlMathUtil;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.AutoDrive;
@@ -28,16 +30,24 @@ public class RobotContainer {
     private final SlewRateLimiter xLimit = new SlewRateLimiter(300);
     private final SlewRateLimiter yLimit = new SlewRateLimiter(300);
 
+    private final SendableChooser<Integer> m_chooser = new SendableChooser<>();
+
     private final Joystick driver1 = new Joystick(Constants.Driver1Port);
     
 
     public RobotContainer() {
+        // Add commands to the autonomous command chooser
+        m_chooser.setDefaultOption("Drive Back and Shoot", 0);
+        m_chooser.addOption("Drive to ball, turn, and Shoot", 1);
+
+        // Put the chooser on the dashboard
+        SmartDashboard.putData(m_chooser);
+
         //configures joytsick to drivetrainsubsystem
         //1: up and down 
         //0: left and right
         // 4: rotation
-        
-        
+
         m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
                 m_drivetrainSubsystem,
                 () -> -yLimit.calculate(ControlMathUtil.modifyAxis(driver1.getRawAxis(1), Constants.deadband) * DrivetrainSubsystem.MaxVelocity), 
@@ -56,6 +66,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new AutoDrive(m_drivetrainSubsystem, convey, armControl);
+        return new AutoDrive(m_drivetrainSubsystem, convey, armControl, m_chooser);
     }
 }

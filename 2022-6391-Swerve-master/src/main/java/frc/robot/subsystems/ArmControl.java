@@ -203,7 +203,12 @@ public class ArmControl extends SubsystemBase {
                 a_start = true;
         } else {
             if(!a_start){
-                armSpeed = 0;
+                //TODO Added this, If issues shows up comment out
+                if(armSpeed > 0) {
+                    armSpeed = 0;
+                }
+                //TODO and uncomment this
+                //armSpeed = 0;
             }
         }
 
