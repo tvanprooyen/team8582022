@@ -134,6 +134,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return m_navx.getYaw();
     }
 
+    public void setGyro(double adjustment) {
+        m_navx.setAngleAdjustment(adjustment);
+    }
+
     public void drive(ChassisSpeeds chassisSpeeds) {
         m_chassisSpeeds = chassisSpeeds;
     }
@@ -182,16 +186,34 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return Rotation;
     }
 
+    public void resetDriveEncoders() {
+        m_backLeftModule.resetDriveEncoders();
+        m_backRightModule.resetDriveEncoders();
+        m_frontLeftModule.resetDriveEncoders();
+        m_frontRightModule.resetDriveEncoders();
+    }
+
     public double getAverageEncoder(){
-        double avg = (m_backLeftModule.getDrivePosistion()+
-        m_backRightModule.getDrivePosistion()+
+        double avg = ((-m_backLeftModule.getDrivePosistion())+
+        (-m_backRightModule.getDrivePosistion())+
         m_frontLeftModule.getDrivePosistion()+
         m_frontRightModule.getDrivePosistion())/4;
+
+        avg = -m_backRightModule.getDrivePosistion();
         return avg;
     }
 
-    private void dashboard() {
+    public double getAverageEncoderInches() {
+        return Math.abs((getAverageEncoder() * 0.452) * 100);
+        //178
+        //return -(getAverageEncoder() * 0.452) * 100;
+    }
+
+    private void dashboard() {//0.452
         SmartDashboard.putNumber("Gyro", getGyro());
+        SmartDashboard.putNumber("AvgEncoder", getAverageEncoder());
+        SmartDashboard.putNumber("AvgEncoder INCHES", getAverageEncoderInches());
+        SmartDashboard.putNumber("BR Drive Angle", Math.toDegrees(m_backRightModule.getSteerAngle()));
     }
     
 
@@ -199,10 +221,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public void periodic() {
         dashboard();
 
+        if(driver1.getRawButton(7)){
+            resetDriveEncoders();
+        }
+
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MaxVelocity);
 
-        m_frontLeftModule.set(states[0].speedMetersPerSecond / MaxVelocity * Voltage, states[0].angle.getRadians());
+        m_frontLeftModule.set(-(states[0].speedMetersPerSecond / MaxVelocity * Voltage), states[0].angle.getRadians());
         m_frontRightModule.set(states[1].speedMetersPerSecond / MaxVelocity * Voltage, states[1].angle.getRadians());
         m_backLeftModule.set(states[2].speedMetersPerSecond / MaxVelocity * Voltage, states[2].angle.getRadians());
         m_backRightModule.set(states[3].speedMetersPerSecond / MaxVelocity * Voltage, states[3].angle.getRadians());

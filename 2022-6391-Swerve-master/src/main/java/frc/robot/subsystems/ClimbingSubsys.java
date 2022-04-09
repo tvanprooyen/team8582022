@@ -171,7 +171,7 @@ public class ClimbingSubsys extends SubsystemBase {
 
         
         dashboard();
-        double driveAxis = 0.9 * (driver1.getRawAxis(2) - driver1.getRawAxis(3));
+        double driveAxis = 2 * (driver1.getRawAxis(2) - driver1.getRawAxis(3));
 
         double rightMotorSpeed = driveAxis;
         double leftMotorSpeed = driveAxis;

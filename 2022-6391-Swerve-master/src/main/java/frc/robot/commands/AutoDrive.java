@@ -1,6 +1,8 @@
 
 package frc.robot.commands;
 
+import javax.lang.model.util.ElementScanner6;
+
 import com.team858.control.LimeLight;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -17,12 +19,19 @@ public class AutoDrive extends CommandBase {
     private final DrivetrainSubsystem m_drivetrainSubsystem;
     private final Conveyer m_conveyer;
     private final ArmControl m_arm;
-    private PIDController gyroPID = new PIDController(1.5, 0, 0);  // 0.004
+    private PIDController gyroPID = new PIDController(1, 0, 0);  // 0.004 //1 //0.004
+    private PIDController xPID = new PIDController(5, 0, 0);  // 0.004
+    private PIDController yPID = new PIDController(0.01, 0, 0);  // 0.004 //
     private final Timer timer = new Timer();
     private final Timer as1 = new Timer();
     private final LimeLight limeLight = new LimeLight(-0.02f, 0.02f, //Target Steer PID
                                                         44.125, 101.75, 20); // Target Distance
-    
+    private int seq = 0;
+    private int nextSeq = 0;
+    private int saveSeq = 0;
+
+    private boolean SeqToggle = false;
+
     private final SendableChooser<Integer> m_chooser;
 
     private float masterAngle;
@@ -89,6 +98,8 @@ public class AutoDrive extends CommandBase {
         m_conveyer.enableTeleop(false);
         m_arm.enableTeleop(false);
         this.masterAngle = m_drivetrainSubsystem.getGyro();
+        m_drivetrainSubsystem.zeroGyroscope();
+        m_drivetrainSubsystem.resetDriveEncoders();
         super.initialize();
     }
 
@@ -105,7 +116,7 @@ public class AutoDrive extends CommandBase {
         float gyro = m_drivetrainSubsystem.getGyro();
 
         if(timer.get() < 0.75) {
-            drive(-20, 0, -gyroPID.calculate(gyro, this.masterAngle) * DrivetrainSubsystem.MaxAngularVelocity, true);
+            drive(-20, 0, -gyroPID.calculate(gyro, 0 /* this.masterAngle */) * DrivetrainSubsystem.MaxAngularVelocity, true);
             c_speed = Conveyer.Speed.STOP;
         } /* if(timer.get() < 2) {
             
@@ -138,12 +149,15 @@ public class AutoDrive extends CommandBase {
         Conveyer.Speed c_speed = Conveyer.Speed.STOP;
 
         //linear line
-        double minspeed = 3.75;
+        /* double minspeed = 3.75;
         double maxspeed = 5.04;
         double mindist = 100;
         double maxdist = 180;
         double slope = (maxspeed-minspeed)/(maxdist-mindist);
-        double s_speed = (slope*m_conveyer.GetDistance()) - (slope*mindist) + minspeed;
+        double s_speed = (slope*m_conveyer.GetDistance()) - (slope*mindist) + minspeed; */
+        double s_speed = -0.00556715 * m_conveyer.GetDistance() + 4.62829;
+        double sb_speed = 0.0153097 * m_conveyer.GetDistance() + -1.54029;
+
         float gyro = m_drivetrainSubsystem.getGyro();
         boolean up = true;
         double intake = 0;
@@ -151,27 +165,33 @@ public class AutoDrive extends CommandBase {
         double y = 0;
         double rotation = 0;
         boolean robotOrt = false;
-        
-        if(timer.get() < 3) {
-            if(m_arm.getUSDistance(false) <= 33) {
-                x = 0; y = 0; rotation = 0; robotOrt = false; // -gyroPID.calculate(gyro,this.masterAngle + 179.9) 
-            } else {
-                x = 30; y = 0; rotation = -gyroPID.calculate(gyro,this.masterAngle); robotOrt = true;      
-            }
+
+        if(timer.get() < 0.1) {
+            up = false;
+            intake = -0.3;
+         } else if(timer.get() < 3) {
+            //if(m_arm.getUSDistance(false) <= 33) {
+             //  x = 0; y = 0; rotation = 0; robotOrt = false; // -gyroPID.calculate(gyro,this.masterAngle + 179.9) 
+            //} else {
+                x = 30; y = 0; rotation = -gyroPID.calculate(gyro, 0/* this.masterAngle */); robotOrt = true;      
+            //}
             up = false;
             intake = -0.3;
             s_speed = 0;
+            sb_speed = 0;
         } else if(timer.get() < 3.1) {
             up = true;
             intake = 0;
             s_speed = 0;
+            sb_speed = 0;
             x = 0; y = 0; rotation = 0; robotOrt = false;       
         } else if(timer.get() < 5) {
             up = true;
             intake = 0;
             s_speed = 0;
+            sb_speed = 0;
             //drive(0, 0, -gyroPID.calculate(gyro,this.masterAngle + 179.9), true); 
-            x = 0; y = 0; rotation = -gyroPID.calculate(gyro,this.masterAngle - 179.9); robotOrt = true;
+            x = 0; y = 0; rotation = -gyroPID.calculate(gyro,/* this.masterAngle -  */179.9); robotOrt = true;
         } else if(timer.get() < 7) {
             x = 0; y = 0; rotation = -(limeLight.trackTarget(0) * DrivetrainSubsystem.MaxVelocity); robotOrt = false;
             //drive(0, 0, (limeLight.trackTarget(0) * DrivetrainSubsystem.MaxAngularVelocity), false); 
@@ -184,13 +204,181 @@ public class AutoDrive extends CommandBase {
         } else {
             c_speed = Conveyer.Speed.STOP;
             s_speed = 0;
+            sb_speed = 0;
             x = 0; y = 0; rotation = 0; robotOrt = false;
         }
         
+        m_conveyer.setBackShooterSpeed(sb_speed);
         m_conveyer.setShooterSpeed(s_speed);
 
         m_arm.setDriveArmMotor(up);
         m_arm.setDriveArmIntakeMotor(intake);
+
+        drive(x, y, rotation, robotOrt); 
+    }
+
+    private void auto3() {
+        Conveyer.Speed c_speed = Conveyer.Speed.STOP;
+
+        //linear line
+        /* double minspeed = 3.75;
+        double maxspeed = 5.04;
+        double mindist = 100;
+        double maxdist = 180;
+        double slope = (maxspeed-minspeed)/(maxdist-mindist);
+        double s_speed = (slope*m_conveyer.GetDistance()) - (slope*mindist) + minspeed; */
+        double s_speed = -0.00556715 * m_conveyer.GetDistance() + 4.62829;
+        double sb_speed = 0.0153097 * m_conveyer.GetDistance() + -1.54029;
+        float gyro = m_drivetrainSubsystem.getGyro();
+        boolean up = true;
+        double intake = 0;
+        double x = 0;
+        double y = 0;
+        double rotation = 0;
+        boolean robotOrt = false;
+
+        if(timer.get() < 0.1) {
+            up = false;
+            intake = -0.3;
+         } else if(timer.get() < 3) {
+            if(m_arm.getUSDistance(false) <= 33) {
+                x = 0; y = 0; rotation = 0; robotOrt = false; // -gyroPID.calculate(gyro,this.masterAngle + 179.9) 
+            } else {
+                x = 30; y = 0; rotation = -gyroPID.calculate(gyro, 0 /* this.masterAngle */); robotOrt = true;      
+            }
+            up = false;
+            intake = -0.3;
+            s_speed = 0;
+        } else {
+            up = true;
+            c_speed = Conveyer.Speed.STOP;
+            s_speed = 0;
+            x = 0; y = 0; rotation = 0; robotOrt = false;
+        }
+        
+        m_conveyer.setShooterSpeed(s_speed);
+        m_conveyer.setBackShooterSpeed(sb_speed);
+        m_arm.setDriveArmMotor(up);
+        m_arm.setDriveArmIntakeMotor(intake);
+
+        drive(x, y, rotation, robotOrt); 
+    }
+
+    private void auto4() {
+        double x = 0;
+        double y = 0;
+        double rotation = 0;
+        boolean robotOrt = false;
+        float gyro = m_drivetrainSubsystem.getGyro();
+
+        x = 0; y = 0; rotation = -gyroPID.calculate(gyro, 179.9); robotOrt = true;
+
+        drive(x, y, rotation, robotOrt); 
+    }
+
+    private void auto5() {
+        double x = 0;
+        double y = 0;
+        double rotation = 0;
+        boolean robotOrt = false;
+        float gyro = m_drivetrainSubsystem.getGyro();
+
+        //3 = 135.5
+        //1 = 45.2
+
+        
+        //x = 0; y = 0; rotation = -gyroPID.calculate(gyro, 179.9); robotOrt = true;
+
+        if(timer.get() < 7) {
+            x = -xPID.calculate(-135, -m_drivetrainSubsystem.getAverageEncoderInches()); y = 0; rotation = -gyroPID.calculate(gyro, 0 /* this.masterAngle */); robotOrt = true;
+        } else if(timer.get() < 14) {
+            x = -xPID.calculate(-4, -m_drivetrainSubsystem.getAverageEncoderInches()); y = 0; rotation = -gyroPID.calculate(gyro, 0 /* this.masterAngle */); robotOrt = true;
+        }
+
+       // return;
+
+        /* if(seq == 0 && timer.get() > 7 && -m_drivetrainSubsystem.getAverageEncoderInches() < -135){
+            nextSeq = 1; SeqToggle = true;
+        } else if(seq == 2 && timer.get() > 21 && gyro > 180){
+            nextSeq = 2; SeqToggle = true;
+        } else if(seq == 3 && timer.get() > 28 && gyro > 9.45){
+            nextSeq = 3; SeqToggle = true;
+        } else if(seq == 4 && timer.get() > 34 && -m_drivetrainSubsystem.getAverageEncoderInches() < 100.93){
+            nextSeq = 4; SeqToggle = true;
+        } else if(seq == 5 && timer.get() > 42 && -m_drivetrainSubsystem.getAverageEncoderInches() < 37.16){
+            nextSeq = 5; SeqToggle = true;
+        } else if(seq == 6 && timer.get() > 49 && -m_drivetrainSubsystem.getAverageEncoderInches() < 157.14 && gyro < 180){
+            nextSeq = 6; SeqToggle = true;
+        } else if(seq == 7 && timer.get() > 56 && -m_drivetrainSubsystem.getAverageEncoderInches() < -157.14 ){
+            nextSeq = 7; SeqToggle = true;
+        } else if(seq == 8 && timer.get() > 63 && gyro < 39.22){
+            nextSeq = 8; SeqToggle = true;
+        }
+
+        if(nextSeq != seq) {
+            seq = -1;
+        }
+
+        if(SeqToggle){
+            seq = -1;
+        }
+        
+
+        switch (seq) {
+            case 0:
+                x = xPID.calculate(-51.58, m_drivetrainSubsystem.getAverageEncoderInches()); y = 0; rotation = -gyroPID.calculate(gyro, 0 ); robotOrt = true;
+                break;
+            case 1:
+                x = 0; y = 0; rotation = -gyroPID.calculate(gyro, 180 ); robotOrt = true;
+                break;
+            case 2:
+                x = 0; y = 0; rotation = -gyroPID.calculate(gyro, 9.45 ); robotOrt = true;
+                break;
+            case 3:
+                x = 0; y = yPID.calculate(100.93, m_drivetrainSubsystem.getAverageEncoderInches()); rotation = 0; robotOrt = true;
+                break;
+            case 4:
+                x = xPID.calculate(37.16, m_drivetrainSubsystem.getAverageEncoderInches()); y = 0; rotation = 0; robotOrt = true;
+                break;
+            case 5:
+                x = 0; y = yPID.calculate(157.14, m_drivetrainSubsystem.getAverageEncoderInches()); rotation = -gyroPID.calculate(gyro, 180 ); robotOrt = true;  
+                break;
+            case 6:
+                x = 0; y = yPID.calculate(-157.14, m_drivetrainSubsystem.getAverageEncoderInches()); rotation = 0; robotOrt = true;
+                break;
+            case 7:
+                x = 0; y = 0; rotation = -gyroPID.calculate(gyro, 39.22 ); robotOrt = true;
+                break;
+            case -1: //reset
+                x = 0; y = 0; rotation = 0; robotOrt = true;
+                m_drivetrainSubsystem.zeroGyroscope();
+                m_drivetrainSubsystem.resetDriveEncoders();
+                break;
+            default:
+            x = 0; y = 0; rotation = 0; robotOrt = true;
+                break;
+        }
+
+        if(nextSeq != seq) {
+            seq = nextSeq;
+        }
+
+        if(SeqToggle){
+            seq = nextSeq;
+            SeqToggle = false;
+        } */
+
+        /* if(x > 0.2) {
+            x = 0.2;
+        } */
+
+        if(x < (-0.2 * DrivetrainSubsystem.MaxVelocity) && x < 0) {
+            x = (-0.2 * DrivetrainSubsystem.MaxVelocity);
+        }
+
+        if(x > (0.2 * DrivetrainSubsystem.MaxVelocity) && x > 0) {
+            x = (0.2 * DrivetrainSubsystem.MaxVelocity);
+        }
 
         drive(x, y, rotation, robotOrt); 
     }
@@ -207,7 +395,13 @@ public class AutoDrive extends CommandBase {
             case 1:
                 auto2();
                 break;
-        
+            case 2:
+                auto3();
+                break;
+            case 3:
+            auto4();
+                //auto4();
+                break;
             default:
                 return;
         }
@@ -215,6 +409,7 @@ public class AutoDrive extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        m_drivetrainSubsystem.setGyro(this.masterAngle + m_drivetrainSubsystem.getGyro());
         m_drivetrainSubsystem.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
         timer.stop();
         timer.reset();

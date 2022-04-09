@@ -88,6 +88,8 @@ public final class NeoDriveControllerFactoryBuilder {
             return encoder.getPosition();
         }
 
+        
+
         @Override
         public void resetEncoder() {
             encoder.setPosition(0);

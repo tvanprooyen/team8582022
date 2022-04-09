@@ -102,13 +102,13 @@ public final class Constants {
     public static final int FLdriveID = 10; 
     public static final int FLsteerID = 11;
     public static final int FLencoderID = 26; 
-    public static final double FLoffset = -Math.toRadians(171.74);
+    public static final double FLoffset = Math.toRadians(232.38 + 90 + 45 + 10 - 5 + 20);
 
     //Front Right
     public static final int FRdriveID = 4;
     public static final int FRsteerID = 5; 
     public static final int FRencoderID = 29;
-    public static final double FRoffset = -Math.toRadians( 232.38);
+    public static final double FRoffset = -Math.toRadians(171.74 + 90 + 10 - 5);
 
     //Back Left
     public static final int BLdriveID = 9;

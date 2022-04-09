@@ -39,6 +39,9 @@ public class RobotContainer {
         // Add commands to the autonomous command chooser
         m_chooser.setDefaultOption("Drive Back and Shoot", 0);
         m_chooser.addOption("Drive to ball, turn, and Shoot", 1);
+        m_chooser.addOption("Drive to ball and STOP", 2);
+        m_chooser.addOption("Movement Test", 3);
+        //m_chooser.addOption("Gyro Test", 3);
 
         // Put the chooser on the dashboard
         SmartDashboard.putData(m_chooser);
